@@ -31,7 +31,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Dapper">
+      <HintPath>packages\Dapper.1.13\lib\net40\Dapper.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -40,10 +44,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dapper\SqlBuilder.cs" />
+    <Compile Include="Helpers\AttributeHelperExtensions.cs" />
+    <Compile Include="Metadata\Criteria.cs" />
+    <Compile Include="Metadata\OrderType.cs" />
+    <Compile Include="Metadata\Query.cs" />
+    <Compile Include="QueryBuilder.cs" />
+    <Compile Include="Metadata\QueryType.cs" />
+    <Compile Include="Metadata\TableAttribute.cs" />
+    <Compile Include="Metadata\WhereAttribute.cs" />
+    <Compile Include="Metadata\WhereType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Metadata\" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
