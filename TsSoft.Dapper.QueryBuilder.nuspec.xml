@@ -11,6 +11,9 @@
     <description>REPLACEME</description>
     <copyright>REPLACEME</copyright>
     <tags>Dapper</tags>
+    <dependencies>
+      <dependency id="Dapper" version="[1.13,2)" />
+    </dependencies>
   </metadata>
   <files>
 	<file src="TsSoft.Dapper.QueryBuilder.dll" target="lib\net4" />
