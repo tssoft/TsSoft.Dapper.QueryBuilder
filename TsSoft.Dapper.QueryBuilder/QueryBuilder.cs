@@ -9,7 +9,7 @@ using TsSoft.Dapper.QueryBuilder.Metadata;
 
 namespace TsSoft.Dapper.QueryBuilder
 {
-    public abstract class QueryBuilder<TCriteria> where TCriteria : Criteria
+    public class QueryBuilder<TCriteria> where TCriteria : Criteria
     {
         private readonly TableAttribute table;
 
@@ -145,6 +145,7 @@ namespace TsSoft.Dapper.QueryBuilder
                 case WhereType.GtEq:
                 case WhereType.LtEq:
                 case WhereType.Like:
+                case WhereType.In:
                     return false;
                 case WhereType.IsNull:
                 case WhereType.IsNotNull:
@@ -170,6 +171,7 @@ namespace TsSoft.Dapper.QueryBuilder
                 case WhereType.Lt:
                 case WhereType.GtEq:
                 case WhereType.LtEq:
+                case WhereType.In:
                     return string.Format("{0} {1}", GetSelector(whereType), paramName);
                 default:
                     throw new ArgumentOutOfRangeException("whereType");

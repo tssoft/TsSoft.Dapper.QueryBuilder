@@ -22,5 +22,7 @@ namespace TsSoft.Dapper.QueryBuilder.Metadata
         IsNull,
         [Description("is not null")]
         IsNotNull,
+        [Description("in")]
+        In,
     }
 }

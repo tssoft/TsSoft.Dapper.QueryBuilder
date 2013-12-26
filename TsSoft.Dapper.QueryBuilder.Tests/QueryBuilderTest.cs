@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Dapper;
@@ -85,6 +86,22 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             Assert.AreEqual("TableNameDateTo", parameters.ParameterNames.Last());
         }
 
+        [TestMethod]
+        public void TestIn()
+        {
+            var builder = new TestQueryBuilder<TestCriteria>(new TestCriteria
+            {
+                Codes = new string[3]{"1", "2", "3"},
+            });
+            Query query = builder.Build();
+            Assert.AreEqual(
+                "Select TableName.* from TableName WHERE TableName.Code in @TableNameCodes",
+                SimplifyString(query.Sql));
+            DynamicParameters parameters = ToDynamicParameters(query.Parameters);
+            Assert.AreEqual(1, parameters.ParameterNames.Count());
+            Assert.AreEqual("TableNameCodes", parameters.ParameterNames.Single());
+        }
+
         private static string SimplifyString(string str)
         {
             return
@@ -112,6 +129,9 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
 
             [Where("Date", WhereType = WhereType.LtEq)]
             public DateTime? DateTo { get; set; }
+
+            [Where("Code", WhereType = WhereType.In)]
+            public IEnumerable<string> Codes { get; set; }
         }
 
         private class TestQueryBuilder<T> : QueryBuilder<T> where T : Criteria
