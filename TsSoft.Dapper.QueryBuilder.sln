@@ -1,9 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TsSoft.Dapper.QueryBuilder", "TsSoft.Dapper.QueryBuilder.csproj", "{D1823781-4408-4B36-897E-7F1E507E4AB1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TsSoft.Dapper.QueryBuilder", "TsSoft.Dapper.QueryBuilder\TsSoft.Dapper.QueryBuilder.csproj", "{D1823781-4408-4B36-897E-7F1E507E4AB1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TsSoft.Dapper.QueryBuilder.Tests", "..\TsSoft.Dapper.QueryBuilder.Tests\TsSoft.Dapper.QueryBuilder.Tests.csproj", "{FE5DA7E0-BC82-45A5-AC55-62B3385644CC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TsSoft.Dapper.QueryBuilder.Tests", "TsSoft.Dapper.QueryBuilder.Tests\TsSoft.Dapper.QueryBuilder.Tests.csproj", "{FE5DA7E0-BC82-45A5-AC55-62B3385644CC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{A3CC7161-238F-4F81-8912-037289D48FDA}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
