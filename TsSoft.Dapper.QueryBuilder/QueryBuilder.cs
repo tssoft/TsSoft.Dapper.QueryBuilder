@@ -120,7 +120,7 @@ namespace TsSoft.Dapper.QueryBuilder
                                        ? whereAttribute.TableName
                                        : TableName;
                 string paramName = string.Format("@{0}{1}", tableName, propertyInfo.Name);
-                var str = GeWheretSting(whereAttribute, propertyInfo, tableName, paramName, value);
+                var str = GeWheretSting(whereAttribute, propertyInfo, tableName, paramName, ref value);
                 if (!IsWithoutValue(whereAttribute.WhereType))
                 {
                     dbArgs.Add(paramName, value);                    
@@ -130,7 +130,7 @@ namespace TsSoft.Dapper.QueryBuilder
             Builder.AddParameters(dbArgs);
         }
 
-        private string GeWheretSting(WhereAttribute whereAttribute, PropertyInfo propertyInfo, string tableName, string paramName, object value)
+        private string GeWheretSting(WhereAttribute whereAttribute, PropertyInfo propertyInfo, string tableName, string paramName, ref object value)
         {
             var fieldName = !string.IsNullOrWhiteSpace(whereAttribute.Field)
                                 ? whereAttribute.Field
