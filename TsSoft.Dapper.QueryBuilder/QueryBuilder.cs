@@ -120,11 +120,7 @@ namespace TsSoft.Dapper.QueryBuilder
                                        ? whereAttribute.TableName
                                        : TableName;
                 string paramName = string.Format("@{0}{1}", tableName, propertyInfo.Name);
-
-                string str = string.Format("{0}.{1} {2} ", tableName,
-                                           !string.IsNullOrWhiteSpace(whereAttribute.Field)
-                                               ? whereAttribute.Field
-                                               : propertyInfo.Name, GetExpression(whereAttribute.WhereType, paramName, ref value));
+                var str = GeWheretSting(whereAttribute, propertyInfo, tableName, paramName, value);
                 if (!IsWithoutValue(whereAttribute.WhereType))
                 {
                     dbArgs.Add(paramName, value);                    
@@ -132,6 +128,42 @@ namespace TsSoft.Dapper.QueryBuilder
                 Builder.Where(str);
             }
             Builder.AddParameters(dbArgs);
+        }
+
+        private string GeWheretSting(WhereAttribute whereAttribute, PropertyInfo propertyInfo, string tableName, string paramName, object value)
+        {
+            var fieldName = !string.IsNullOrWhiteSpace(whereAttribute.Field)
+                                ? whereAttribute.Field
+                                : propertyInfo.Name;
+            string str;
+            SetValueByWhereType(whereAttribute.WhereType, ref value);
+            if (string.IsNullOrWhiteSpace(whereAttribute.Expression))
+            {
+                str = string.Format("{0}.{1} {2} ", tableName, fieldName
+                                       , GetExpression(whereAttribute.WhereType, paramName, ref value));
+            }
+            else
+            {
+                var whereString = GetWhereStringByExpression(whereAttribute, tableName, fieldName, GetSelector(whereAttribute.WhereType),
+                                           paramName);
+                str = string.Format("({0})", whereString);
+            }
+            return str;
+        }
+
+        private string GetWhereStringByExpression(WhereAttribute whereAttribute, string tableName, string fieldName, string compareOperation, string paramName)
+        {
+            return whereAttribute.Expression
+                          .Replace(GetNameForReplace("TableName"), tableName)
+                          .Replace(GetNameForReplace("FieldName"), fieldName)
+                          .Replace(GetNameForReplace("CompareOperation"), compareOperation)
+                          .Replace(GetNameForReplace("Parameter"), paramName)
+                          ;
+        }
+
+        private static string GetNameForReplace(string replaced)
+        {
+            return string.Format("/**{0}**/", replaced);
         }
 
         private static bool IsWithoutValue(WhereType whereType)
@@ -155,12 +187,33 @@ namespace TsSoft.Dapper.QueryBuilder
             }
         }
 
-        private static string GetExpression(WhereType whereType, string paramName, ref object value)
+        private static void SetValueByWhereType(WhereType whereType, ref object value)
         {
             switch (whereType)
             {
                 case WhereType.Like:
                     value = string.Format("%{0}%", value);
+                    break;
+                case WhereType.IsNull:
+                case WhereType.IsNotNull:
+                case WhereType.Eq:
+                case WhereType.NotEq:
+                case WhereType.Gt:
+                case WhereType.Lt:
+                case WhereType.GtEq:
+                case WhereType.LtEq:
+                case WhereType.In:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException("whereType");   
+            }
+        }
+
+        private static string GetExpression(WhereType whereType, string paramName, ref object value)
+        {
+            switch (whereType)
+            {
+                case WhereType.Like:
                     return string.Format("{0} {1}", GetSelector(whereType), paramName);
                 case WhereType.IsNull:
                 case WhereType.IsNotNull:

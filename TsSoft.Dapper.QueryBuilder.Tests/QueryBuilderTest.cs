@@ -90,9 +90,9 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestIn()
         {
             var builder = new TestQueryBuilder<TestCriteria>(new TestCriteria
-            {
-                Codes = new string[3]{"1", "2", "3"},
-            });
+                {
+                    Codes = new string[3] {"1", "2", "3"},
+                });
             Query query = builder.Build();
             Assert.AreEqual(
                 "Select TableName.* from TableName WHERE TableName.Code in @TableNameCodes",
@@ -100,6 +100,21 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             DynamicParameters parameters = ToDynamicParameters(query.Parameters);
             Assert.AreEqual(1, parameters.ParameterNames.Count());
             Assert.AreEqual("TableNameCodes", parameters.ParameterNames.Single());
+        }
+
+        [TestMethod]
+        public void TestExpression()
+        {
+            var builder = new TestQueryBuilder<TestCriteria>(new TestCriteria
+            {
+                DateWithExpression = DateTime.Now,
+            });
+            Query query = builder.Build();
+            Assert.AreEqual("Select TableName.* from TableName WHERE ((TableName.Date is not null and TableName.Date >= @TableNameDateWithExpression) or (TableName.DateSecond >= @TableNameDateWithExpression))"
+                , SimplifyString(query.Sql));
+            DynamicParameters parameters = ToDynamicParameters(query.Parameters);
+            Assert.AreEqual(1, parameters.ParameterNames.Count());
+            Assert.AreEqual("TableNameDateWithExpression", parameters.ParameterNames.Single());
         }
 
         private static string SimplifyString(string str)
@@ -132,6 +147,14 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
 
             [Where("Code", WhereType = WhereType.In)]
             public IEnumerable<string> Codes { get; set; }
+
+            [Where("Date",
+                Expression =
+                    "(/**TableName**/./**FieldName**/ is not null and /**TableName**/./**FieldName**/ /**CompareOperation**/ /**Parameter**/)" +
+                    " or " +
+                    "(/**TableName**/.DateSecond /**CompareOperation**/ /**Parameter**/)",
+                WhereType = WhereType.GtEq)]
+            public DateTime? DateWithExpression { get; set; }
         }
 
         private class TestQueryBuilder<T> : QueryBuilder<T> where T : Criteria

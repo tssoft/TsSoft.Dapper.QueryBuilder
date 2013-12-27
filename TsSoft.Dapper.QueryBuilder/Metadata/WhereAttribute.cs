@@ -16,6 +16,8 @@ namespace TsSoft.Dapper.QueryBuilder.Metadata
 
         public string Field { get; private set; }
 
+        public string Expression { get; set; }
+
         public WhereType WhereType { get; set; }
 
         public string TableName { get; set; }
