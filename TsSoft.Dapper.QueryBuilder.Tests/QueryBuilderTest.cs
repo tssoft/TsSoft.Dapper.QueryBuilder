@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Dapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -33,9 +35,12 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             Query query = builder.Build();
             Assert.AreEqual("Select TableName.* from TableName WHERE TableName.Id = @TableNameId",
                             SimplifyString(query.Sql));
-            DynamicParameters parameters = ToDynamicParameters(query.Parameters);
-            Assert.AreEqual(1, parameters.ParameterNames.Count());
-            Assert.AreEqual("TableNameId", parameters.ParameterNames.Single());
+            DynamicParameters dynamicParameters = ToDynamicParameters(query.Parameters);
+            Dictionary<string, object> parameters = GetKeyValues(dynamicParameters);
+
+            Assert.AreEqual(1, dynamicParameters.ParameterNames.Count());
+            Assert.AreEqual("TableNameId", dynamicParameters.ParameterNames.Single());
+            Assert.AreEqual(1, parameters["TableNameId"]);
         }
 
         [TestMethod]
@@ -48,73 +53,92 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             Query query = builder.Build();
             Assert.AreEqual("Select TableName.* from TableName WHERE TableName.Name Like @TableNameName",
                             SimplifyString(query.Sql));
-            DynamicParameters parameters = ToDynamicParameters(query.Parameters);
-            Assert.AreEqual(1, parameters.ParameterNames.Count());
-            Assert.AreEqual("TableNameName", parameters.ParameterNames.Single());
+            DynamicParameters dynamicParameters = ToDynamicParameters(query.Parameters);
+            Dictionary<string, object> parameters = GetKeyValues(dynamicParameters);
+
+            Assert.AreEqual(1, dynamicParameters.ParameterNames.Count());
+            Assert.AreEqual("TableNameName", dynamicParameters.ParameterNames.Single());
+            Assert.AreEqual("%123%", parameters["TableNameName"]);
         }
 
         [TestMethod]
         public void TestGtEq()
         {
-            var builder = new TestQueryBuilder<TestCriteria>(new TestCriteria
+            var crit = new TestCriteria
                 {
                     DateFrom = DateTime.Now,
-                });
+                };
+            var builder = new TestQueryBuilder<TestCriteria>(crit);
             Query query = builder.Build();
             Assert.AreEqual("Select TableName.* from TableName WHERE TableName.Date >= @TableNameDateFrom",
                             SimplifyString(query.Sql));
-            DynamicParameters parameters = ToDynamicParameters(query.Parameters);
-            Assert.AreEqual(1, parameters.ParameterNames.Count());
-            Assert.AreEqual("TableNameDateFrom", parameters.ParameterNames.Single());
+            DynamicParameters dynamicParameters = ToDynamicParameters(query.Parameters);
+            Dictionary<string, object> parameters = GetKeyValues(dynamicParameters);
+            Assert.AreEqual(1, dynamicParameters.ParameterNames.Count());
+            Assert.AreEqual("TableNameDateFrom", dynamicParameters.ParameterNames.Single());
+            Assert.AreEqual(crit.DateFrom, parameters["TableNameDateFrom"]);
         }
 
         [TestMethod]
         public void TestGtEqAndLtEq()
         {
-            var builder = new TestQueryBuilder<TestCriteria>(new TestCriteria
+            var testCriteria = new TestCriteria
                 {
                     DateFrom = DateTime.Now,
                     DateTo = DateTime.Now
-                });
+                };
+            var builder = new TestQueryBuilder<TestCriteria>(testCriteria);
             Query query = builder.Build();
             Assert.AreEqual(
                 "Select TableName.* from TableName WHERE TableName.Date >= @TableNameDateFrom AND TableName.Date <= @TableNameDateTo",
                 SimplifyString(query.Sql));
-            DynamicParameters parameters = ToDynamicParameters(query.Parameters);
-            Assert.AreEqual(2, parameters.ParameterNames.Count());
-            Assert.AreEqual("TableNameDateFrom", parameters.ParameterNames.First());
-            Assert.AreEqual("TableNameDateTo", parameters.ParameterNames.Last());
+            DynamicParameters dynamicParameters = ToDynamicParameters(query.Parameters);
+            Dictionary<string, object> parameters = GetKeyValues(dynamicParameters);
+            Assert.AreEqual(2, dynamicParameters.ParameterNames.Count());
+            Assert.AreEqual("TableNameDateFrom", dynamicParameters.ParameterNames.First());
+            Assert.AreEqual("TableNameDateTo", dynamicParameters.ParameterNames.Last());
+            Assert.AreEqual(testCriteria.DateFrom, parameters["TableNameDateFrom"]);
+            Assert.AreEqual(testCriteria.DateTo, parameters["TableNameDateTo"]);
         }
 
         [TestMethod]
         public void TestIn()
         {
-            var builder = new TestQueryBuilder<TestCriteria>(new TestCriteria
+            var testCriteria = new TestCriteria
                 {
-                    Codes = new string[3] {"1", "2", "3"},
-                });
+                    Codes = new[] {"1", "2", "3"},
+                };
+            var builder = new TestQueryBuilder<TestCriteria>(testCriteria);
             Query query = builder.Build();
             Assert.AreEqual(
                 "Select TableName.* from TableName WHERE TableName.Code in @TableNameCodes",
                 SimplifyString(query.Sql));
-            DynamicParameters parameters = ToDynamicParameters(query.Parameters);
-            Assert.AreEqual(1, parameters.ParameterNames.Count());
-            Assert.AreEqual("TableNameCodes", parameters.ParameterNames.Single());
+
+            DynamicParameters dynamicParameters = ToDynamicParameters(query.Parameters);
+            Dictionary<string, object> parameters = GetKeyValues(dynamicParameters);
+
+            Assert.AreEqual(1, dynamicParameters.ParameterNames.Count());
+            Assert.AreEqual("TableNameCodes", dynamicParameters.ParameterNames.Single());
+            CollectionAssert.AreEqual(testCriteria.Codes.ToList(), (string[]) parameters["TableNameCodes"]);
         }
 
         [TestMethod]
         public void TestExpression()
         {
-            var builder = new TestQueryBuilder<TestCriteria>(new TestCriteria
-            {
-                DateWithExpression = DateTime.Now,
-            });
+            var testCriteria = new TestCriteria
+                {
+                    DateWithExpression = DateTime.Now,
+                };
+            var builder = new TestQueryBuilder<TestCriteria>(testCriteria);
             Query query = builder.Build();
-            Assert.AreEqual("Select TableName.* from TableName WHERE ((TableName.Date is not null and TableName.Date >= @TableNameDateWithExpression) or (TableName.DateSecond >= @TableNameDateWithExpression))"
+            Assert.AreEqual(
+                "Select TableName.* from TableName WHERE ((TableName.Date is not null and TableName.Date >= @TableNameDateWithExpression) or (TableName.DateSecond >= @TableNameDateWithExpression))"
                 , SimplifyString(query.Sql));
-            DynamicParameters parameters = ToDynamicParameters(query.Parameters);
-            Assert.AreEqual(1, parameters.ParameterNames.Count());
-            Assert.AreEqual("TableNameDateWithExpression", parameters.ParameterNames.Single());
+            DynamicParameters dynamicParameters = ToDynamicParameters(query.Parameters);
+            Dictionary<string, object> parameters = GetKeyValues(dynamicParameters);
+            Assert.AreEqual(1, dynamicParameters.ParameterNames.Count());
+            Assert.AreEqual("TableNameDateWithExpression", dynamicParameters.ParameterNames.Single());
+            Assert.AreEqual(testCriteria.DateWithExpression, parameters["TableNameDateWithExpression"]);
         }
 
         private static string SimplifyString(string str)
@@ -123,6 +147,31 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
                 new Regex("\\s+").Replace(
                     str.Replace("\\r\\n", " ").Replace("\\r", " ").Replace("\\n", " ").Replace(Environment.NewLine, " "),
                     " ").Trim().Replace("  ", " ");
+        }
+
+        private static Dictionary<string, object> GetKeyValues(DynamicParameters dp)
+        {
+            BindingFlags all = Enum.GetValues(typeof (BindingFlags))
+                                   .Cast<BindingFlags>()
+                                   .Aggregate((BindingFlags) 0, (flags, bindingFlags) => flags | bindingFlags);
+            FieldInfo fieldInfo = dp.GetType().GetField("parameters", all);
+            if (fieldInfo == null)
+            {
+                throw new InvalidOperationException();
+            }
+            object paramInfos = fieldInfo.GetValue(dp);
+            var dictionary = new Dictionary<string, object>();
+            foreach (string name in dp.ParameterNames)
+            {
+                var paramInfo = (paramInfos as IDictionary);
+                if (paramInfo == null)
+                {
+                    throw new InvalidOperationException();
+                }
+                var value = paramInfo[name];
+                dictionary.Add(name, value.GetType().GetProperty("Value").GetValue(value));
+            }
+            return dictionary;
         }
 
         private static DynamicParameters ToDynamicParameters(object o)
