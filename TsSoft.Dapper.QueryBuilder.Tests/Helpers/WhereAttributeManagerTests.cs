@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TsSoft.Dapper.QueryBuilder.Helpers;
 using TsSoft.Dapper.QueryBuilder.Helpers.Where;
 using TsSoft.Dapper.QueryBuilder.Models.Enumerations;
 
@@ -60,10 +55,10 @@ namespace TsSoft.Dapper.QueryBuilderTests.Helpers
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        [ExpectedException(typeof (ArgumentOutOfRangeException))]
         public void TestGetSelectorExpExc()
         {
-            whereAttributeManager.GetSelector((WhereType)100000);
+            whereAttributeManager.GetSelector((WhereType) 100000);
         }
 
         [TestMethod]
@@ -86,10 +81,10 @@ namespace TsSoft.Dapper.QueryBuilderTests.Helpers
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        [ExpectedException(typeof (ArgumentOutOfRangeException))]
         public void TestGetExpressionExpExc()
         {
-            whereAttributeManager.GetExpression((WhereType)100000, "ParameterNAme");
+            whereAttributeManager.GetExpression((WhereType) 100000, "ParameterNAme");
         }
     }
 }

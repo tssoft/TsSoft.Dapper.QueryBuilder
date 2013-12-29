@@ -11,7 +11,7 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
             {
                 throw new ArgumentException("joinAttributeType should inherit JoinAttribute");
             }
-            if (joinAttributeType == typeof(SimpleJoinAttribute))
+            if (joinAttributeType == typeof (SimpleJoinAttribute))
             {
                 return new SimpleJoinClauseCreator();
             }

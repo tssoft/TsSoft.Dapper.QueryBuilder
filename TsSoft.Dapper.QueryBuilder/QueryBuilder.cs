@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dapper;
-using TsSoft.Dapper.QueryBuilder.Helpers;
 using TsSoft.Dapper.QueryBuilder.Helpers.Join;
 using TsSoft.Dapper.QueryBuilder.Helpers.Where;
 using TsSoft.Dapper.QueryBuilder.Metadata;
@@ -13,8 +12,12 @@ namespace TsSoft.Dapper.QueryBuilder
 {
     public class QueryBuilder<TCriteria> where TCriteria : Criteria
     {
-        private static readonly WhereClauseManager WhereClauseManager = new WhereClauseManager(new WhereAttributeManager());
-        private static readonly JoinClauseManager JoinClauseManager = new JoinClauseManager(new JoinClauseCreatorFactory());
+        private static readonly WhereClauseManager WhereClauseManager =
+            new WhereClauseManager(new WhereAttributeManager());
+
+        private static readonly JoinClauseManager JoinClauseManager =
+            new JoinClauseManager(new JoinClauseCreatorFactory());
+
         private readonly TableAttribute table;
         protected SqlBuilder Builder;
         protected SqlBuilder.Template CountTemplate;
@@ -33,9 +36,9 @@ namespace TsSoft.Dapper.QueryBuilder
                                                                criteria.GetType()));
             }
             Criteria = criteria;
-            
+
             Builder = new SqlBuilder();
-            
+
             SimplyTemplate = Builder.AddTemplate(SimplySql);
             PaginateTemplate = Builder.AddTemplate(PaginateSql, new {Criteria.Skip, Criteria.Take});
             CountTemplate = Builder.AddTemplate(CountSql);
@@ -95,13 +98,13 @@ namespace TsSoft.Dapper.QueryBuilder
 
         protected virtual void Join()
         {
-            var joinClauses = JoinClauseManager.Get(Criteria, TableName);
-            foreach (var joinClause in joinClauses)
+            IEnumerable<JoinClause> joinClauses = JoinClauseManager.Get(Criteria, TableName);
+            foreach (JoinClause joinClause in joinClauses)
             {
                 Builder.Select(string.Format("0 as {0}", joinClause.Splitter));
                 if (joinClause.HasJoin)
                 {
-                    foreach (var joinSql in joinClause.JoinSqls)
+                    foreach (string joinSql in joinClause.JoinSqls)
                     {
                         switch (joinClause.JoinType)
                         {
@@ -118,7 +121,7 @@ namespace TsSoft.Dapper.QueryBuilder
                                 throw new ArgumentOutOfRangeException();
                         }
                     }
-                    foreach (var selectSql in joinClause.SelectsSql)
+                    foreach (string selectSql in joinClause.SelectsSql)
                     {
                         Builder.Select(selectSql);
                     }

@@ -9,7 +9,7 @@ namespace TsSoft.Dapper.QueryBuilder.Metadata
 
         public FormatAttribute(Type formatter)
         {
-            if (!typeof(IFormatter).IsAssignableFrom(formatter))
+            if (!typeof (IFormatter).IsAssignableFrom(formatter))
             {
                 throw new ArgumentException("Type must implement IFormatter");
             }

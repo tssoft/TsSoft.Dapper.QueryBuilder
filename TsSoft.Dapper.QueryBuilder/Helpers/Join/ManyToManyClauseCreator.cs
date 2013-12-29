@@ -34,7 +34,8 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
             var joins = new List<string>
                 {
                     string.Format("{0} on {0}.{1} = {2}.{3}", manyToManyJoinAttribute.CommunicationTable,
-                                  manyToManyJoinAttribute.CommunicationTableCurrentTableField, manyToManyJoinAttribute.CurrentTable,
+                                  manyToManyJoinAttribute.CommunicationTableCurrentTableField,
+                                  manyToManyJoinAttribute.CurrentTable,
                                   manyToManyJoinAttribute.CurrentTableField),
                     string.Format("{0} on {0}.{1} = {2}.{3}", manyToManyJoinAttribute.JoinedTable,
                                   manyToManyJoinAttribute.JoinedTableField, manyToManyJoinAttribute.CommunicationTable,

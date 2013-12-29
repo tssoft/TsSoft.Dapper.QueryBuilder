@@ -22,7 +22,8 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
             {
                 foreach (var tableSelectColumn in simpleJoinAttribute.TableSelectColumns)
                 {
-                    selects.AddRange(tableSelectColumn.Value.Select(column => string.Format("{0}.{1}", tableSelectColumn.Key, column)));
+                    selects.AddRange(
+                        tableSelectColumn.Value.Select(column => string.Format("{0}.{1}", tableSelectColumn.Key, column)));
                 }
             }
             else

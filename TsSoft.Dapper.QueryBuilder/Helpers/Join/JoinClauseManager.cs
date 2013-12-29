@@ -28,7 +28,7 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
                     throw new NotImplementedException("Join implemented to only bool properties");
                 }
                 var joinAttribute = propertyInfo.GetCustomAttribute<JoinAttribute>();
-                var joiner = joinClauseCreatorFactory.Get(joinAttribute.GetType());
+                IJoinClauseCreator joiner = joinClauseCreatorFactory.Get(joinAttribute.GetType());
                 if (!(bool) propertyInfo.GetValue(criteria, null))
                 {
                     joinClauses.Add(joiner.CreateNotJoin(joinAttribute));
