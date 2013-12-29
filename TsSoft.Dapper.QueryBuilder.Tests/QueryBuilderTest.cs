@@ -148,19 +148,19 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestFormatter()
         {
             var testCriteria = new TestCriteria
-            {
-                DateTimeWithFormatter = DateTime.Now,
-            };
+                {
+                    DateTimeWithFormatter = DateTime.Now,
+                };
             var builder = new TestQueryBuilder<TestCriteria>(testCriteria);
             Query query = builder.Build();
             Assert.AreEqual(
-                "Select TableName.* from TableName WHERE DateTimeWithFormatter = @DateTimeWithFormatter"
+                "Select TableName.* from TableName WHERE TableName.DateTimeWithFormatter = @TableNameDateTimeWithFormatter"
                 , SimplifyString(query.Sql));
             DynamicParameters dynamicParameters = ToDynamicParameters(query.Parameters);
             Dictionary<string, object> parameters = GetKeyValues(dynamicParameters);
             Assert.AreEqual(1, dynamicParameters.ParameterNames.Count());
-            Assert.AreEqual("DateTimeWithFormatter", dynamicParameters.ParameterNames.Single());
-            Assert.AreEqual("1", parameters["DateTimeWithFormatter"]);
+            Assert.AreEqual("TableNameDateTimeWithFormatter", dynamicParameters.ParameterNames.Single());
+            Assert.AreEqual("1", parameters["TableNameDateTimeWithFormatter"]);
         }
 
         private static string SimplifyString(string str)
@@ -190,7 +190,7 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
                 {
                     throw new InvalidOperationException();
                 }
-                var value = paramInfo[name];
+                object value = paramInfo[name];
                 dictionary.Add(name, value.GetType().GetProperty("Value").GetValue(value));
             }
             return dictionary;
@@ -199,6 +199,14 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         private static DynamicParameters ToDynamicParameters(object o)
         {
             return o as DynamicParameters;
+        }
+
+        private class FormatterTest : IFormatter
+        {
+            public void Format(ref object input)
+            {
+                input = "1";
+            }
         }
 
         [Table(Name = "TableName")]
@@ -228,8 +236,8 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             public DateTime? DateWithExpression { get; set; }
 
             [Where]
-            [Format(typeof(FormatterTest))]
-            public DateTime DateTimeWithFormatter { get; set; }
+            [Format(typeof (FormatterTest))]
+            public DateTime? DateTimeWithFormatter { get; set; }
         }
 
         private class TestQueryBuilder<T> : QueryBuilder<T> where T : Criteria
@@ -237,14 +245,6 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             public TestQueryBuilder(T criteria)
                 : base(criteria)
             {
-            }
-        }
-
-        private class FormatterTest : IFormatter
-        {
-            public object Format(object input)
-            {
-                return "1";
             }
         }
     }

@@ -2,6 +2,6 @@
 {
     public interface IFormatter
     {
-        object Format(object input);
+        void Format(ref object input);
     }
 }

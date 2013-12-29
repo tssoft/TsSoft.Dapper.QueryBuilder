@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Reflection;
 using Dapper;
-using TsSoft.Dapper.QueryBuilder.Formatters;
 using TsSoft.Dapper.QueryBuilder.Helpers;
 using TsSoft.Dapper.QueryBuilder.Metadata;
 using TsSoft.Dapper.QueryBuilder.Models;
@@ -14,8 +11,8 @@ namespace TsSoft.Dapper.QueryBuilder
 {
     public class QueryBuilder<TCriteria> where TCriteria : Criteria
     {
+        private static readonly WhereClauseManager WhereClauseManager = new WhereClauseManager(new WhereAttributeManager());
         private readonly TableAttribute table;
-
         protected SqlBuilder Builder;
         protected SqlBuilder.Template CountTemplate;
         protected SqlBuilder.Template ExistsTemplate;
@@ -29,18 +26,18 @@ namespace TsSoft.Dapper.QueryBuilder
                 (TableAttribute) criteria.GetType().GetCustomAttributes(typeof (TableAttribute), false).FirstOrDefault();
             if (table == null)
             {
-                throw new NullReferenceException(string.Format("Не определена таблица у критерии {0}",
+                throw new NullReferenceException(string.Format("Not exists table from criteria {0}",
                                                                criteria.GetType()));
             }
             Criteria = criteria;
-            //Создаем билдер
+            
             Builder = new SqlBuilder();
-            //Добавляем шаблоны. Все операции с билдером будут производиться со всеми шаблонами.
+            
             SimplyTemplate = Builder.AddTemplate(SimplySql);
             PaginateTemplate = Builder.AddTemplate(PaginateSql, new {Criteria.Skip, Criteria.Take});
             CountTemplate = Builder.AddTemplate(CountSql);
             ExistsTemplate = Builder.AddTemplate(ExistsSql);
-            //Создаем контейнер для разделителей, при join будем добавлять сюда поля
+
             SplitOn = new List<string>();
         }
 
@@ -51,8 +48,6 @@ namespace TsSoft.Dapper.QueryBuilder
 
         public TCriteria Criteria { get; private set; }
 
-        //Создаем шаблон для sql
-        //делаем виртуальным, чтобы переопределить в наследниках, если понадобится
         protected string SimplySql
         {
             get
@@ -105,137 +100,20 @@ namespace TsSoft.Dapper.QueryBuilder
 
         protected virtual void Where()
         {
-            IEnumerable<PropertyInfo> props =
-                typeof (TCriteria).GetProperties()
-                                  .Where(x => x.GetCustomAttributes(typeof(WhereAttribute), false).Count() != 0);
+            IEnumerable<WhereClauseManager.WhereClauseModel> whereClauses = WhereClauseManager.Get(Criteria, TableName);
             var dbArgs = new DynamicParameters();
-            foreach (PropertyInfo propertyInfo in props)
+
+
+            foreach (WhereClauseManager.WhereClauseModel whereClause in whereClauses)
             {
-                object value;
-                var whereAttribute = (WhereAttribute) propertyInfo.GetCustomAttributes(typeof(WhereAttribute), false).Single();
-                if ((value = propertyInfo.GetValue(Criteria, null)) == null)
+                if (!whereClause.WithoutValue)
                 {
-                    continue;
+                    dbArgs.Add(whereClause.ParameterName, whereClause.ParameterValue);
                 }
-                string tableName = !string.IsNullOrWhiteSpace(whereAttribute.TableName)
-                                       ? whereAttribute.TableName
-                                       : TableName;
-                string paramName = string.Format("@{0}{1}", tableName, propertyInfo.Name);
-                var str = GeWheretSting(whereAttribute, propertyInfo, tableName, paramName, ref value);
-                if (!IsWithoutValue(whereAttribute.WhereType))
-                {
-                    dbArgs.Add(paramName, value);                    
-                }
-                Builder.Where(str);
+                Builder.Where(whereClause.Sql);
             }
+
             Builder.AddParameters(dbArgs);
-        }
-
-        private string GeWheretSting(WhereAttribute whereAttribute, PropertyInfo propertyInfo, string tableName, string paramName, ref object value)
-        {
-            var fieldName = !string.IsNullOrWhiteSpace(whereAttribute.Field)
-                                ? whereAttribute.Field
-                                : propertyInfo.Name;
-            string str;
-            var formatAttr = propertyInfo.GetCustomAttribute<FormatAttribute>();
-            IFormatter formatter = null;
-            if (formatAttr != null)
-            {
-                formatter = (IFormatter) Activator.CreateInstance(formatAttr.FormatterType);
-            }
-            SetValueByWhereType(whereAttribute.WhereType, ref value, formatter);
-            if (string.IsNullOrWhiteSpace(whereAttribute.Expression))
-            {
-                str = string.Format("{0}.{1} {2} ", tableName, fieldName
-                                       , GetExpression(whereAttribute.WhereType, paramName, ref value));
-            }
-            else
-            {
-                var whereString = GetWhereStringByExpression(whereAttribute, tableName, fieldName, GetSelector(whereAttribute.WhereType),
-                                           paramName);
-                str = string.Format("({0})", whereString);
-            }
-            return str;
-        }
-
-        private string GetWhereStringByExpression(WhereAttribute whereAttribute, string tableName, string fieldName, string compareOperation, string paramName)
-        {
-            return whereAttribute.Expression
-                          .Replace(GetNameForReplace("TableName"), tableName)
-                          .Replace(GetNameForReplace("FieldName"), fieldName)
-                          .Replace(GetNameForReplace("CompareOperation"), compareOperation)
-                          .Replace(GetNameForReplace("Parameter"), paramName)
-                          ;
-        }
-
-        private static string GetNameForReplace(string replaced)
-        {
-            return string.Format("/**{0}**/", replaced);
-        }
-
-        private static bool IsWithoutValue(WhereType whereType)
-        {
-            switch (whereType)
-            {
-                case WhereType.Eq:
-                case WhereType.NotEq:
-                case WhereType.Gt:
-                case WhereType.Lt:
-                case WhereType.GtEq:
-                case WhereType.LtEq:
-                case WhereType.Like:
-                case WhereType.In:
-                    return false;
-                case WhereType.IsNull:
-                case WhereType.IsNotNull:
-                    return true;
-                default:
-                    throw new ArgumentOutOfRangeException("whereType");
-            }
-        }
-
-        private static void SetValueByWhereType(WhereType whereType, ref object value, IFormatter formatter = null)
-        {
-            if (formatter == null)
-            {
-                formatter = GetFormatter(whereType);
-            }
-            value = formatter.Format(value);
-        }
-
-        private static string GetExpression(WhereType whereType, string paramName, ref object value)
-        {
-            switch (whereType)
-            {
-                case WhereType.IsNull:
-                case WhereType.IsNotNull:
-                    return GetSelector(whereType);
-                case WhereType.Eq:
-                case WhereType.NotEq:
-                case WhereType.Gt:
-                case WhereType.Lt:
-                case WhereType.GtEq:
-                case WhereType.LtEq:
-                case WhereType.In:
-                case WhereType.Like:
-                    return string.Format("{0} {1}", GetSelector(whereType), paramName);
-                default:
-                    throw new ArgumentOutOfRangeException("whereType");
-            }
-        }
-
-        private static string GetSelector(WhereType whereType)
-        {
-            return whereType.Getattribute<DescriptionAttribute>().Description;
-        }
-
-        private static IFormatter GetFormatter(WhereType whereType)
-        {
-            if (whereType == WhereType.Like)
-            {
-                return new SimpleLikeFormatter();
-            }
-            return new DummyFormatter();
         }
 
         protected virtual void GroupBy()
@@ -253,10 +131,6 @@ namespace TsSoft.Dapper.QueryBuilder
             }
         }
 
-        /// <summary>
-        ///     В зависимости от типа запроса возвращает шаблон
-        /// </summary>
-        /// <returns></returns>
         protected SqlBuilder.Template GetTemplate()
         {
             switch (Criteria.QueryType)
@@ -274,10 +148,6 @@ namespace TsSoft.Dapper.QueryBuilder
             }
         }
 
-        /// <summary>
-        ///     Возвращает объект запроса
-        /// </summary>
-        /// <returns></returns>
         public virtual Query Build()
         {
             Select();

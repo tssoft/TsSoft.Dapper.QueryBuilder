@@ -2,9 +2,8 @@
 {
     public class DummyFormatter : IFormatter
     {
-        public object Format(object input)
+        public void Format(ref object input)
         {
-            return input;
         }
     }
 }

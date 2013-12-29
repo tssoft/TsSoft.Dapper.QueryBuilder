@@ -48,6 +48,9 @@
   <ItemGroup>
     <Compile Include="Dapper\SqlBuilder.cs" />
     <Compile Include="Formatters\DummyFormatter.cs" />
+    <Compile Include="Helpers\IWhereAttributeManager.cs" />
+    <Compile Include="Helpers\WhereAttributeManager.cs" />
+    <Compile Include="Helpers\WhereClauseManager.cs" />
     <Compile Include="Metadata\FormatAttribute.cs" />
     <Compile Include="Formatters\IFormatter.cs" />
     <Compile Include="Formatters\SimpleLikeFormatter.cs" />
