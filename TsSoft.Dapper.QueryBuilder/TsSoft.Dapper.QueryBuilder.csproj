@@ -51,8 +51,10 @@
     <Compile Include="Helpers\Join\IJoinClauseCreator.cs" />
     <Compile Include="Helpers\Join\IJoinClauseCreatorFactory.cs" />
     <Compile Include="Helpers\Join\JoinClause.cs" />
+    <Compile Include="Helpers\Join\JoinClauseCreator.cs" />
     <Compile Include="Helpers\Join\JoinClauseCreatorFactory.cs" />
     <Compile Include="Helpers\Join\JoinClauseManager.cs" />
+    <Compile Include="Helpers\Join\ManyToManyClauseCreator.cs" />
     <Compile Include="Helpers\Join\SimpleJoinClauseCreator.cs" />
     <Compile Include="Helpers\Where\IWhereAttributeManager.cs" />
     <Compile Include="Helpers\Where\WhereAttributeManager.cs" />
@@ -61,6 +63,8 @@
     <Compile Include="Formatters\IFormatter.cs" />
     <Compile Include="Formatters\SimpleLikeFormatter.cs" />
     <Compile Include="Helpers\AttributeHelperExtensions.cs" />
+    <Compile Include="Metadata\JoinAttribute.cs" />
+    <Compile Include="Metadata\ManyToManyJoinAttribute.cs" />
     <Compile Include="Models\Enumerations\JoinType.cs" />
     <Compile Include="Metadata\SimpleJoinAttribute.cs" />
     <Compile Include="Models\Criteria.cs" />

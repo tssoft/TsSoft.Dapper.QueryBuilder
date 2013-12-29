@@ -118,7 +118,10 @@ namespace TsSoft.Dapper.QueryBuilder
                                 throw new ArgumentOutOfRangeException();
                         }
                     }
-                    Builder.Select(joinClause.SelectSql);
+                    foreach (var selectSql in joinClause.SelectsSql)
+                    {
+                        Builder.Select(selectSql);
+                    }
                 }
                 SplitOn.Add(joinClause.Splitter);
             }

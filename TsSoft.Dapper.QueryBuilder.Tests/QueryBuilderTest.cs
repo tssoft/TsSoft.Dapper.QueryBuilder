@@ -167,9 +167,9 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestSimpleJoin()
         {
             var testCriteria = new TestJoinCriteria
-            {
-                WithAnotherTable = true,
-            };
+                {
+                    WithAnotherTable = true,
+                };
             var builder = new TestQueryBuilder<TestJoinCriteria>(testCriteria);
             Query query = builder.Build();
             Assert.AreEqual(
@@ -182,13 +182,45 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestSimpleJoinEmpty()
         {
             var testCriteria = new TestJoinCriteria
-            {
-                WithAnotherTable = false,
-            };
+                {
+                    WithAnotherTable = false,
+                };
             var builder = new TestQueryBuilder<TestJoinCriteria>(testCriteria);
             Query query = builder.Build();
             Assert.AreEqual(
                 "Select TableName.* , 0 as SplitOnAnotherTableCurrentTableId from TableName"
+                , SimplifyString(query.Sql)
+                );
+        }
+
+        [TestMethod]
+        public void TestManyToManyJoin()
+        {
+            var testCriteria = new TestManyToManyJoinCriteria
+            {
+                WithAnotherTable = true,
+            };
+            var builder = new TestQueryBuilder<TestManyToManyJoinCriteria>(testCriteria);
+            Query query = builder.Build();
+            Assert.AreEqual(
+                "Select TableName.* , 0 as SplitOnAnotherTableAnotherId , AnotherTable.* from TableName " +
+                "LEFT JOIN AnotherTableCurrentTable on AnotherTableCurrentTable.CurrentId = TableName.CurrentId " +
+                "LEFT JOIN AnotherTable on AnotherTable.AnotherId = AnotherTableCurrentTable.AnotherId"
+                , SimplifyString(query.Sql)
+                );
+        }
+
+        [TestMethod]
+        public void TestManyToManyJoinEmpty()
+        {
+            var testCriteria = new TestManyToManyJoinCriteria
+            {
+                WithAnotherTable = false,
+            };
+            var builder = new TestQueryBuilder<TestManyToManyJoinCriteria>(testCriteria);
+            Query query = builder.Build();
+            Assert.AreEqual(
+                "Select TableName.* , 0 as SplitOnAnotherTableAnotherId from TableName"
                 , SimplifyString(query.Sql)
                 );
         }
@@ -268,13 +300,23 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             [Where]
             [Format(typeof (FormatterTest))]
             public DateTime? DateTimeWithFormatter { get; set; }
-
         }
 
         [Table(Name = "TableName")]
         private class TestJoinCriteria : Criteria
         {
-            [SimpleJoin("AnotherTable", "CurrentTableId", JoinType.Left, JoinedTableField = "CurrentTableId")]
+            [SimpleJoin("CurrentTableId", JoinType.Left, "AnotherTable", JoinedTableField = "CurrentTableId")]
+            public bool WithAnotherTable { get; set; }
+
+            [Where]
+            public int? Id { get; set; }
+        }
+
+        [Table(Name = "TableName")]
+        private class TestManyToManyJoinCriteria : Criteria
+        {
+            [ManyToManyJoin("CurrentId", JoinType.Left, "AnotherTable", "AnotherTableCurrentTable", "CurrentId",
+                "AnotherId", JoinedTableField = "AnotherId")]
             public bool WithAnotherTable { get; set; }
 
             [Where]

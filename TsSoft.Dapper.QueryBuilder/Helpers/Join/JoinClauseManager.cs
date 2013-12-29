@@ -45,10 +45,5 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
             }
             return joinClauses;
         }
-
-        private JoinClause Create(JoinAttribute joinAttribute)
-        {
-            return joinClauseCreatorFactory.Get(joinAttribute.GetType()).Create(joinAttribute);
-        }
     }
 }

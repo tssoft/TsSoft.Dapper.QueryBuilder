@@ -9,7 +9,7 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
 
         public IEnumerable<string> JoinSqls { get; set; }
 
-        public string SelectSql { get; set; }
+        public IEnumerable<string> SelectsSql { get; set; }
 
         public JoinType JoinType { get; set; }
 

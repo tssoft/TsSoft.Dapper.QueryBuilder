@@ -15,6 +15,10 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
             {
                 return new SimpleJoinClauseCreator();
             }
+            if (joinAttributeType == typeof (ManyToManyJoinAttribute))
+            {
+                return new ManyToManyClauseCreator();
+            }
             throw new ArgumentOutOfRangeException("joinAttributeType");
         }
     }

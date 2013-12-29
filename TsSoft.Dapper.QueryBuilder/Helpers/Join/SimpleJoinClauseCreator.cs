@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using TsSoft.Dapper.QueryBuilder.Metadata;
 
 namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
 {
-    public sealed class SimpleJoinClauseCreator : IJoinClauseCreator
+    public sealed class SimpleJoinClauseCreator : JoinClauseCreator
     {
-        public JoinClause Create(JoinAttribute joinAttribute)
+        public override JoinClause Create(JoinAttribute joinAttribute)
         {
             SimpleJoinAttribute simpleJoinAttribute;
             if ((simpleJoinAttribute = joinAttribute as SimpleJoinAttribute) == null)
@@ -16,7 +17,18 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
 
             string splitter = string.Format("SplitOn{0}{1}", simpleJoinAttribute.JoinedTable,
                                             simpleJoinAttribute.JoinedTableField);
-            string select = string.Format("{0}.*", simpleJoinAttribute.JoinedTable);
+            var selects = new List<string>();
+            if (simpleJoinAttribute.TableSelectColumns != null && simpleJoinAttribute.TableSelectColumns.Any())
+            {
+                foreach (var tableSelectColumn in simpleJoinAttribute.TableSelectColumns)
+                {
+                    selects.AddRange(tableSelectColumn.Value.Select(column => string.Format("{0}.{1}", tableSelectColumn.Key, column)));
+                }
+            }
+            else
+            {
+                selects.Add(string.Format("{0}.*", simpleJoinAttribute.JoinedTable));
+            }
             string joinSql = string.Format("{0} on {0}.{1} = {2}.{3}", simpleJoinAttribute.JoinedTable,
                                            simpleJoinAttribute.JoinedTableField, simpleJoinAttribute.CurrentTable,
                                            simpleJoinAttribute.CurrentTableField);
@@ -27,29 +39,12 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
                         {
                             joinSql,
                         },
-                    SelectSql = select,
+                    SelectsSql = selects,
                     Splitter = splitter,
                     JoinType = simpleJoinAttribute.JoinType,
                     HasJoin = true,
                 };
             return result;
-        }
-
-        public JoinClause CreateNotJoin(JoinAttribute joinAttribute)
-        {
-            SimpleJoinAttribute simpleJoinAttribute;
-            if ((simpleJoinAttribute = joinAttribute as SimpleJoinAttribute) == null)
-            {
-                throw new ArgumentException("Attribute must be SimpleJoinAttribute");
-            }
-            string splitter = string.Format("SplitOn{0}{1}", simpleJoinAttribute.JoinedTable,
-                                            simpleJoinAttribute.JoinedTableField);
-            return new JoinClause
-                {
-                    HasJoin = false,
-                    Splitter = splitter,
-                    JoinType = simpleJoinAttribute.JoinType,
-                };
         }
     }
 }
