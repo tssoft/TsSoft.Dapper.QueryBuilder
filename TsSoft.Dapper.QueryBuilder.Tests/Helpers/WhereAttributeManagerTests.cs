@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TsSoft.Dapper.QueryBuilder.Helpers;
+using TsSoft.Dapper.QueryBuilder.Helpers.Where;
 using TsSoft.Dapper.QueryBuilder.Models.Enumerations;
 
 namespace TsSoft.Dapper.QueryBuilderTests.Helpers

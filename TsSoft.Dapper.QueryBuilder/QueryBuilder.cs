@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Dapper;
 using TsSoft.Dapper.QueryBuilder.Helpers;
+using TsSoft.Dapper.QueryBuilder.Helpers.Join;
+using TsSoft.Dapper.QueryBuilder.Helpers.Where;
 using TsSoft.Dapper.QueryBuilder.Metadata;
 using TsSoft.Dapper.QueryBuilder.Models;
 using TsSoft.Dapper.QueryBuilder.Models.Enumerations;
@@ -12,6 +14,7 @@ namespace TsSoft.Dapper.QueryBuilder
     public class QueryBuilder<TCriteria> where TCriteria : Criteria
     {
         private static readonly WhereClauseManager WhereClauseManager = new WhereClauseManager(new WhereAttributeManager());
+        private static readonly JoinClauseManager JoinClauseManager = new JoinClauseManager(new JoinClauseCreatorFactory());
         private readonly TableAttribute table;
         protected SqlBuilder Builder;
         protected SqlBuilder.Template CountTemplate;
@@ -90,12 +93,35 @@ namespace TsSoft.Dapper.QueryBuilder
             Builder.Select(string.Format(@"{0}.*", TableName));
         }
 
-        protected virtual void InnerJoin()
+        protected virtual void Join()
         {
-        }
-
-        protected virtual void LeftJoin()
-        {
+            var joinClauses = JoinClauseManager.Get(Criteria, TableName);
+            foreach (var joinClause in joinClauses)
+            {
+                Builder.Select(string.Format("0 as {0}", joinClause.Splitter));
+                if (joinClause.HasJoin)
+                {
+                    foreach (var joinSql in joinClause.JoinSqls)
+                    {
+                        switch (joinClause.JoinType)
+                        {
+                            case JoinType.Inner:
+                                Builder.InnerJoin(joinSql);
+                                break;
+                            case JoinType.Left:
+                                Builder.LeftJoin(joinSql);
+                                break;
+                            case JoinType.Right:
+                                Builder.RightJoin(joinSql);
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
+                    }
+                    Builder.Select(joinClause.SelectSql);
+                }
+                SplitOn.Add(joinClause.Splitter);
+            }
         }
 
         protected virtual void Where()
@@ -151,8 +177,7 @@ namespace TsSoft.Dapper.QueryBuilder
         public virtual Query Build()
         {
             Select();
-            InnerJoin();
-            LeftJoin();
+            Join();
             Where();
             GroupBy();
             OrderBy();

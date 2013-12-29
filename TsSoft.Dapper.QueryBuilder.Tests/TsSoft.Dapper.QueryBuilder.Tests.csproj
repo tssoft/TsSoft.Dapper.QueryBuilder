@@ -56,6 +56,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Helpers\Join\JoinClauseCreatorFactoryTests.cs" />
+    <Compile Include="Helpers\Join\SimpleJoinClauseCreatorTests.cs" />
     <Compile Include="Helpers\WhereAttributeManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryBuilderTest.cs" />

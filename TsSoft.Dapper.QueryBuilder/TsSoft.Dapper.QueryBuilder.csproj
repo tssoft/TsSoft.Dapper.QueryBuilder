@@ -48,13 +48,21 @@
   <ItemGroup>
     <Compile Include="Dapper\SqlBuilder.cs" />
     <Compile Include="Formatters\DummyFormatter.cs" />
-    <Compile Include="Helpers\IWhereAttributeManager.cs" />
-    <Compile Include="Helpers\WhereAttributeManager.cs" />
-    <Compile Include="Helpers\WhereClauseManager.cs" />
+    <Compile Include="Helpers\Join\IJoinClauseCreator.cs" />
+    <Compile Include="Helpers\Join\IJoinClauseCreatorFactory.cs" />
+    <Compile Include="Helpers\Join\JoinClause.cs" />
+    <Compile Include="Helpers\Join\JoinClauseCreatorFactory.cs" />
+    <Compile Include="Helpers\Join\JoinClauseManager.cs" />
+    <Compile Include="Helpers\Join\SimpleJoinClauseCreator.cs" />
+    <Compile Include="Helpers\Where\IWhereAttributeManager.cs" />
+    <Compile Include="Helpers\Where\WhereAttributeManager.cs" />
+    <Compile Include="Helpers\Where\WhereClauseManager.cs" />
     <Compile Include="Metadata\FormatAttribute.cs" />
     <Compile Include="Formatters\IFormatter.cs" />
     <Compile Include="Formatters\SimpleLikeFormatter.cs" />
     <Compile Include="Helpers\AttributeHelperExtensions.cs" />
+    <Compile Include="Models\Enumerations\JoinType.cs" />
+    <Compile Include="Metadata\SimpleJoinAttribute.cs" />
     <Compile Include="Models\Criteria.cs" />
     <Compile Include="Models\Enumerations\OrderType.cs" />
     <Compile Include="Models\Query.cs" />

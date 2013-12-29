@@ -163,6 +163,36 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             Assert.AreEqual("1", parameters["TableNameDateTimeWithFormatter"]);
         }
 
+        [TestMethod]
+        public void TestSimpleJoin()
+        {
+            var testCriteria = new TestJoinCriteria
+            {
+                WithAnotherTable = true,
+            };
+            var builder = new TestQueryBuilder<TestJoinCriteria>(testCriteria);
+            Query query = builder.Build();
+            Assert.AreEqual(
+                "Select TableName.* , 0 as SplitOnAnotherTableCurrentTableId , AnotherTable.* from TableName LEFT JOIN AnotherTable on AnotherTable.CurrentTableId = TableName.CurrentTableId"
+                , SimplifyString(query.Sql)
+                );
+        }
+
+        [TestMethod]
+        public void TestSimpleJoinEmpty()
+        {
+            var testCriteria = new TestJoinCriteria
+            {
+                WithAnotherTable = false,
+            };
+            var builder = new TestQueryBuilder<TestJoinCriteria>(testCriteria);
+            Query query = builder.Build();
+            Assert.AreEqual(
+                "Select TableName.* , 0 as SplitOnAnotherTableCurrentTableId from TableName"
+                , SimplifyString(query.Sql)
+                );
+        }
+
         private static string SimplifyString(string str)
         {
             return
@@ -238,6 +268,17 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             [Where]
             [Format(typeof (FormatterTest))]
             public DateTime? DateTimeWithFormatter { get; set; }
+
+        }
+
+        [Table(Name = "TableName")]
+        private class TestJoinCriteria : Criteria
+        {
+            [SimpleJoin("AnotherTable", "CurrentTableId", JoinType.Left, JoinedTableField = "CurrentTableId")]
+            public bool WithAnotherTable { get; set; }
+
+            [Where]
+            public int? Id { get; set; }
         }
 
         private class TestQueryBuilder<T> : QueryBuilder<T> where T : Criteria

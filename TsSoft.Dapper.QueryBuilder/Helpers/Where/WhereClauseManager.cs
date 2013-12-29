@@ -7,7 +7,7 @@ using TsSoft.Dapper.QueryBuilder.Metadata;
 using TsSoft.Dapper.QueryBuilder.Models;
 using TsSoft.Dapper.QueryBuilder.Models.Enumerations;
 
-namespace TsSoft.Dapper.QueryBuilder.Helpers
+namespace TsSoft.Dapper.QueryBuilder.Helpers.Where
 {
     public class WhereClauseManager
     {
