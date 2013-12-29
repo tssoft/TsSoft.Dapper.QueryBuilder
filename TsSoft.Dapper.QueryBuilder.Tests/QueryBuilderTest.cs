@@ -6,7 +6,10 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Dapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using TsSoft.Dapper.QueryBuilder.Formatters;
 using TsSoft.Dapper.QueryBuilder.Metadata;
+using TsSoft.Dapper.QueryBuilder.Models;
+using TsSoft.Dapper.QueryBuilder.Models.Enumerations;
 
 namespace TsSoft.Dapper.QueryBuilder.Tests
 {
@@ -141,6 +144,25 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             Assert.AreEqual(testCriteria.DateWithExpression, parameters["TableNameDateWithExpression"]);
         }
 
+        [TestMethod]
+        public void TestFormatter()
+        {
+            var testCriteria = new TestCriteria
+            {
+                DateTimeWithFormatter = DateTime.Now,
+            };
+            var builder = new TestQueryBuilder<TestCriteria>(testCriteria);
+            Query query = builder.Build();
+            Assert.AreEqual(
+                "Select TableName.* from TableName WHERE DateTimeWithFormatter = @DateTimeWithFormatter"
+                , SimplifyString(query.Sql));
+            DynamicParameters dynamicParameters = ToDynamicParameters(query.Parameters);
+            Dictionary<string, object> parameters = GetKeyValues(dynamicParameters);
+            Assert.AreEqual(1, dynamicParameters.ParameterNames.Count());
+            Assert.AreEqual("DateTimeWithFormatter", dynamicParameters.ParameterNames.Single());
+            Assert.AreEqual("1", parameters["DateTimeWithFormatter"]);
+        }
+
         private static string SimplifyString(string str)
         {
             return
@@ -204,6 +226,10 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
                     "(/**TableName**/.DateSecond /**CompareOperation**/ /**Parameter**/)",
                 WhereType = WhereType.GtEq)]
             public DateTime? DateWithExpression { get; set; }
+
+            [Where]
+            [Format(typeof(FormatterTest))]
+            public DateTime DateTimeWithFormatter { get; set; }
         }
 
         private class TestQueryBuilder<T> : QueryBuilder<T> where T : Criteria
@@ -211,6 +237,14 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             public TestQueryBuilder(T criteria)
                 : base(criteria)
             {
+            }
+        }
+
+        private class FormatterTest : IFormatter
+        {
+            public object Format(object input)
+            {
+                return "1";
             }
         }
     }

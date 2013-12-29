@@ -47,15 +47,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Dapper\SqlBuilder.cs" />
+    <Compile Include="Formatters\DummyFormatter.cs" />
+    <Compile Include="Metadata\FormatAttribute.cs" />
+    <Compile Include="Formatters\IFormatter.cs" />
+    <Compile Include="Formatters\SimpleLikeFormatter.cs" />
     <Compile Include="Helpers\AttributeHelperExtensions.cs" />
-    <Compile Include="Metadata\Criteria.cs" />
-    <Compile Include="Metadata\OrderType.cs" />
-    <Compile Include="Metadata\Query.cs" />
+    <Compile Include="Models\Criteria.cs" />
+    <Compile Include="Models\Enumerations\OrderType.cs" />
+    <Compile Include="Models\Query.cs" />
     <Compile Include="QueryBuilder.cs" />
-    <Compile Include="Metadata\QueryType.cs" />
+    <Compile Include="Models\Enumerations\QueryType.cs" />
     <Compile Include="Metadata\TableAttribute.cs" />
     <Compile Include="Metadata\WhereAttribute.cs" />
-    <Compile Include="Metadata\WhereType.cs" />
+    <Compile Include="Models\Enumerations\WhereType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

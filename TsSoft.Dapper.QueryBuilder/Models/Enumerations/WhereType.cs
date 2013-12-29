@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace TsSoft.Dapper.QueryBuilder.Metadata
+namespace TsSoft.Dapper.QueryBuilder.Models.Enumerations
 {
     public enum WhereType
     {

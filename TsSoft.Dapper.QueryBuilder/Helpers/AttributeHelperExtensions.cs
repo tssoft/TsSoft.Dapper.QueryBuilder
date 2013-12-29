@@ -6,10 +6,11 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers
 {
     public static class AttributeHelperExtensions
     {
-         public static T GetCustomAttribute<T>(this MemberInfo memberInfo) where T : Attribute
-         {
-             return (T) memberInfo.GetCustomAttributes(typeof (T), false).Single();
-         }
+        public static T GetCustomAttribute<T>(this MemberInfo memberInfo) where T : Attribute
+        {
+            return (T) memberInfo.GetCustomAttributes(typeof (T), false).SingleOrDefault();
+        }
+
 
         public static T Getattribute<T>(this Enum value) where T : Attribute
         {

@@ -4,8 +4,11 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using Dapper;
+using TsSoft.Dapper.QueryBuilder.Formatters;
 using TsSoft.Dapper.QueryBuilder.Helpers;
 using TsSoft.Dapper.QueryBuilder.Metadata;
+using TsSoft.Dapper.QueryBuilder.Models;
+using TsSoft.Dapper.QueryBuilder.Models.Enumerations;
 
 namespace TsSoft.Dapper.QueryBuilder
 {
@@ -87,8 +90,6 @@ namespace TsSoft.Dapper.QueryBuilder
             get { return table.Name; }
         }
 
-        //Метод селекта, по умолчанию будет выбираться все у таблицы, привязанной к критерии.
-        //Чтобы изменить поведение просто переопределить в наследнике
         protected virtual void Select()
         {
             Builder.Select(string.Format(@"{0}.*", TableName));
@@ -136,7 +137,13 @@ namespace TsSoft.Dapper.QueryBuilder
                                 ? whereAttribute.Field
                                 : propertyInfo.Name;
             string str;
-            SetValueByWhereType(whereAttribute.WhereType, ref value);
+            var formatAttr = propertyInfo.GetCustomAttribute<FormatAttribute>();
+            IFormatter formatter = null;
+            if (formatAttr != null)
+            {
+                formatter = (IFormatter) Activator.CreateInstance(formatAttr.FormatterType);
+            }
+            SetValueByWhereType(whereAttribute.WhereType, ref value, formatter);
             if (string.IsNullOrWhiteSpace(whereAttribute.Expression))
             {
                 str = string.Format("{0}.{1} {2} ", tableName, fieldName
@@ -187,34 +194,19 @@ namespace TsSoft.Dapper.QueryBuilder
             }
         }
 
-        private static void SetValueByWhereType(WhereType whereType, ref object value)
+        private static void SetValueByWhereType(WhereType whereType, ref object value, IFormatter formatter = null)
         {
-            switch (whereType)
+            if (formatter == null)
             {
-                case WhereType.Like:
-                    value = string.Format("%{0}%", value);
-                    break;
-                case WhereType.IsNull:
-                case WhereType.IsNotNull:
-                case WhereType.Eq:
-                case WhereType.NotEq:
-                case WhereType.Gt:
-                case WhereType.Lt:
-                case WhereType.GtEq:
-                case WhereType.LtEq:
-                case WhereType.In:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException("whereType");   
+                formatter = GetFormatter(whereType);
             }
+            value = formatter.Format(value);
         }
 
         private static string GetExpression(WhereType whereType, string paramName, ref object value)
         {
             switch (whereType)
             {
-                case WhereType.Like:
-                    return string.Format("{0} {1}", GetSelector(whereType), paramName);
                 case WhereType.IsNull:
                 case WhereType.IsNotNull:
                     return GetSelector(whereType);
@@ -225,6 +217,7 @@ namespace TsSoft.Dapper.QueryBuilder
                 case WhereType.GtEq:
                 case WhereType.LtEq:
                 case WhereType.In:
+                case WhereType.Like:
                     return string.Format("{0} {1}", GetSelector(whereType), paramName);
                 default:
                     throw new ArgumentOutOfRangeException("whereType");
@@ -234,6 +227,15 @@ namespace TsSoft.Dapper.QueryBuilder
         private static string GetSelector(WhereType whereType)
         {
             return whereType.Getattribute<DescriptionAttribute>().Description;
+        }
+
+        private static IFormatter GetFormatter(WhereType whereType)
+        {
+            if (whereType == WhereType.Like)
+            {
+                return new SimpleLikeFormatter();
+            }
+            return new DummyFormatter();
         }
 
         protected virtual void GroupBy()

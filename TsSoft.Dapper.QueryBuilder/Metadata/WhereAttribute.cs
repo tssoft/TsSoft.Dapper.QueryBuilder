@@ -1,4 +1,5 @@
 ﻿using System;
+using TsSoft.Dapper.QueryBuilder.Models.Enumerations;
 
 namespace TsSoft.Dapper.QueryBuilder.Metadata
 {
