@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Dapper\SqlBuilder.cs" />
     <Compile Include="Formatters\DummyFormatter.cs" />
+    <Compile Include="Helpers\ISelectParser.cs" />
     <Compile Include="Helpers\Join\IJoinClauseCreator.cs" />
     <Compile Include="Helpers\Join\IJoinClauseCreatorFactory.cs" />
     <Compile Include="Helpers\Join\JoinClause.cs" />
@@ -56,6 +57,7 @@
     <Compile Include="Helpers\Join\JoinClauseManager.cs" />
     <Compile Include="Helpers\Join\ManyToManyClauseCreator.cs" />
     <Compile Include="Helpers\Join\SimpleJoinClauseCreator.cs" />
+    <Compile Include="Helpers\SelectParser.cs" />
     <Compile Include="Helpers\Where\IWhereAttributeManager.cs" />
     <Compile Include="Helpers\Where\WhereAttributeManager.cs" />
     <Compile Include="Helpers\Where\WhereClauseManager.cs" />
