@@ -14,5 +14,7 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
         public JoinType JoinType { get; set; }
 
         public bool HasJoin { get; set; }
+
+        public int Order { get; set; }
     }
 }

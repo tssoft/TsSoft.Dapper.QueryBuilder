@@ -16,5 +16,7 @@ namespace TsSoft.Dapper.QueryBuilder.Metadata
         public string CurrentTable { get; set; }
 
         public string CurrentTableField { get; set; }
+
+        public int Order { get; set; }
     }
 }

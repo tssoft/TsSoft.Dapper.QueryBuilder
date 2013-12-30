@@ -48,6 +48,7 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
                     Splitter = splitter,
                     JoinType = manyToManyJoinAttribute.JoinType,
                     HasJoin = true,
+                    Order = joinAttribute.Order,
                 };
             return result;
         }

@@ -21,6 +21,7 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
                     HasJoin = false,
                     Splitter = splitter,
                     JoinType = simpleJoinAttribute.JoinType,
+                    Order = joinAttribute.Order
                 };
         }
     }

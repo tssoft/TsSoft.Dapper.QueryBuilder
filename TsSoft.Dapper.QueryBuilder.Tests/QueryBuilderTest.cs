@@ -225,6 +225,26 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
                 );
         }
 
+        [TestMethod]
+        public void TestJoinOrder()
+        {
+            var testCriteria = new TestJoinOrderCriteria
+            {
+                WithAirplans = true,
+                WithCars = true,
+                WithHouses = true,
+            };
+            var builder = new TestQueryBuilder<TestJoinOrderCriteria>(testCriteria);
+            Query query = builder.Build();
+            Assert.AreEqual(
+                "Select Persons.* , 0 as SplitOnCarsPersonId , Cars.* , 0 as SplitOnAirplansPersonId , Airplans.* , 0 as SplitOnHousesPersonId , Houses.* from Persons " +
+                "LEFT JOIN Cars on Cars.PersonId = Persons.Id " +
+                "LEFT JOIN Airplans on Airplans.PersonId = Persons.Id " +
+                "LEFT JOIN Houses on Houses.PersonId = Persons.Id"
+                , SimplifyString(query.Sql)
+                );
+        }
+
         private static string SimplifyString(string str)
         {
             return
@@ -321,6 +341,19 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
 
             [Where]
             public int? Id { get; set; }
+        }
+
+        [Table(Name = "Persons")]
+        private class TestJoinOrderCriteria : Criteria
+        {
+            [SimpleJoin("Id", JoinType.Left, "Houses", JoinedTableField = "PersonId")]
+            public bool WithHouses { get; set; }
+
+            [SimpleJoin("Id", JoinType.Left, "Airplans", JoinedTableField = "PersonId", Order = 2)]
+            public bool WithAirplans { get; set; }
+
+            [SimpleJoin("Id", JoinType.Left, "Cars", JoinedTableField = "PersonId", Order = 1)]            
+            public bool WithCars { get; set; }
         }
 
         private class TestQueryBuilder<T> : QueryBuilder<T> where T : Criteria

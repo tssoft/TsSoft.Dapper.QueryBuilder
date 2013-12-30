@@ -98,7 +98,10 @@ namespace TsSoft.Dapper.QueryBuilder
 
         protected virtual void Join()
         {
-            IEnumerable<JoinClause> joinClauses = JoinClauseManager.Get(Criteria, TableName);
+            IEnumerable<JoinClause> joinClauses = JoinClauseManager.Get(Criteria, TableName).OrderBy(x =>
+                {
+                    return x.Order == 0 ? int.MaxValue : x.Order;
+                });
             foreach (JoinClause joinClause in joinClauses)
             {
                 Builder.Select(string.Format("0 as {0}", joinClause.Splitter));
