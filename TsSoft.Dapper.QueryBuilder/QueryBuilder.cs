@@ -14,15 +14,7 @@ namespace TsSoft.Dapper.QueryBuilder
 {
     public class QueryBuilder<TCriteria> where TCriteria : Criteria
     {
-        private static readonly IClauseManager<WhereClause> WhereClauseManager =
-            new WhereClauseManager(new WhereAttributeManager());
-
-        private static readonly IClauseManager<JoinClause> JoinClauseManager =
-            new JoinClauseManager(new JoinClauseCreatorFactory());
-
-        private static readonly IClauseManager<SelectClause> SelectClauseManager = new SelectClauseManager();
-
-        private readonly TableAttribute _table;
+        private static readonly TableAttribute _table;
         protected SqlBuilder Builder;
         protected SqlBuilder.Template CountTemplate;
         protected SqlBuilder.Template ExistsTemplate;
@@ -30,10 +22,17 @@ namespace TsSoft.Dapper.QueryBuilder
         protected SqlBuilder.Template SimplyTemplate;
         protected ICollection<string> SplitOn;
 
+        static QueryBuilder()
+        {
+            WhereClauseManager = new WhereClauseManager(new WhereAttributeManager());
+            JoinClauseManager = new JoinClauseManager(new JoinClauseCreatorFactory());
+            SelectClauseManager = new SelectClauseManager();
+            _table =
+                (TableAttribute) typeof (TCriteria).GetCustomAttributes(typeof (TableAttribute), false).FirstOrDefault();
+        }
+
         public QueryBuilder(TCriteria criteria)
         {
-            _table =
-                (TableAttribute) criteria.GetType().GetCustomAttributes(typeof (TableAttribute), false).FirstOrDefault();
             if (_table == null)
             {
                 throw new NullReferenceException(string.Format("Not exists table from criteria {0}",
@@ -43,13 +42,17 @@ namespace TsSoft.Dapper.QueryBuilder
 
             Builder = new SqlBuilder();
 
-            SimplyTemplate = Builder.AddTemplate(SimplySql);
+            SimplyTemplate = Builder.AddTemplate(SimpleSql);
             PaginateTemplate = Builder.AddTemplate(PaginateSql, new {Criteria.Skip, Criteria.Take});
             CountTemplate = Builder.AddTemplate(CountSql);
             ExistsTemplate = Builder.AddTemplate(ExistsSql);
 
             SplitOn = new List<string>();
         }
+
+        public static IClauseManager<WhereClause> WhereClauseManager { protected get; set; }
+        public static IClauseManager<JoinClause> JoinClauseManager { protected get; set; }
+        public static IClauseManager<SelectClause> SelectClauseManager { protected get; set; }
 
         protected string SplitOnString
         {
@@ -58,7 +61,7 @@ namespace TsSoft.Dapper.QueryBuilder
 
         public TCriteria Criteria { get; private set; }
 
-        protected string SimplySql
+        protected string SimpleSql
         {
             get
             {
