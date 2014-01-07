@@ -30,7 +30,7 @@ namespace TsSoft.Dapper.QueryBuilder
         protected SqlBuilder.Template SimplyTemplate;
         protected ICollection<string> SplitOn;
 
-        protected QueryBuilder(TCriteria criteria)
+        public QueryBuilder(TCriteria criteria)
         {
             _table =
                 (TableAttribute) criteria.GetType().GetCustomAttributes(typeof (TableAttribute), false).FirstOrDefault();
