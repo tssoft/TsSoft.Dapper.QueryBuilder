@@ -2,21 +2,30 @@
 using System.Collections.Generic;
 using TsSoft.Dapper.QueryBuilder.Helpers;
 using TsSoft.Dapper.QueryBuilder.Helpers.Select;
-using TsSoft.Dapper.QueryBuilder.Models.Enumerations;
 
 namespace TsSoft.Dapper.QueryBuilder.Metadata
 {
-    public class SimpleJoinAttribute : JoinAttribute
+    public class AddSelectAttribute : Attribute
     {
-        public readonly string JoinedTable;
         private Type _parserType;
 
+        private ISelectParser _selectParser;
         private IDictionary<string, ICollection<SelectClause>> _tableSelectColumns;
 
-        public SimpleJoinAttribute(string currentTableField, JoinType joinType, string joinedTable)
-            : base(currentTableField, joinType)
+        public ISelectParser SelectParser
         {
-            JoinedTable = joinedTable;
+            get
+            {
+                if (ParserType != null)
+                {
+                    _selectParser = (ISelectParser) Activator.CreateInstance(ParserType);
+                }
+                else
+                {
+                    _selectParser = new SelectParser();
+                }
+                return _selectParser;
+            }
         }
 
         public IDictionary<string, ICollection<SelectClause>> TableSelectColumns
@@ -27,24 +36,9 @@ namespace TsSoft.Dapper.QueryBuilder.Metadata
                 {
                     return null;
                 }
-                if (_tableSelectColumns == null)
-                {
-                    ISelectParser selectParser;
-                    if (ParserType != null)
-                    {
-                        selectParser = (ISelectParser) Activator.CreateInstance(ParserType);
-                    }
-                    else
-                    {
-                        selectParser = new SelectParser();
-                    }
-                    _tableSelectColumns = selectParser.Parse(SelectColumns);
-                }
-                return _tableSelectColumns;
+                return _tableSelectColumns ?? (_tableSelectColumns = SelectParser.Parse(SelectColumns));
             }
         }
-
-        public string JoinedTableField { get; set; }
 
         public string SelectColumns { get; set; }
 

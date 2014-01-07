@@ -23,6 +23,13 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
         }
 
         [TestMethod]
+        public void GetTestMany()
+        {
+            IJoinClauseCreator res = joinClauseCreatorFactory.Get(typeof(ManyToManyJoinAttribute));
+            Assert.AreEqual(typeof(ManyToManyClauseCreator), res.GetType());
+        }
+
+        [TestMethod]
         [ExpectedException(typeof (ArgumentOutOfRangeException))]
         public void GetTestArgumentOutOfRangeException()
         {

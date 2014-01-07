@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dapper;
+using TsSoft.Dapper.QueryBuilder.Helpers;
 using TsSoft.Dapper.QueryBuilder.Helpers.Join;
+using TsSoft.Dapper.QueryBuilder.Helpers.Select;
 using TsSoft.Dapper.QueryBuilder.Helpers.Where;
 using TsSoft.Dapper.QueryBuilder.Metadata;
 using TsSoft.Dapper.QueryBuilder.Models;
@@ -12,13 +14,15 @@ namespace TsSoft.Dapper.QueryBuilder
 {
     public class QueryBuilder<TCriteria> where TCriteria : Criteria
     {
-        private static readonly WhereClauseManager WhereClauseManager =
+        private static readonly IClauseManager<WhereClause> WhereClauseManager =
             new WhereClauseManager(new WhereAttributeManager());
 
-        private static readonly JoinClauseManager JoinClauseManager =
+        private static readonly IClauseManager<JoinClause> JoinClauseManager =
             new JoinClauseManager(new JoinClauseCreatorFactory());
 
-        private readonly TableAttribute table;
+        private static readonly IClauseManager<SelectClause> SelectClauseManager = new SelectClauseManager();
+
+        private readonly TableAttribute _table;
         protected SqlBuilder Builder;
         protected SqlBuilder.Template CountTemplate;
         protected SqlBuilder.Template ExistsTemplate;
@@ -28,12 +32,12 @@ namespace TsSoft.Dapper.QueryBuilder
 
         protected QueryBuilder(TCriteria criteria)
         {
-            table =
+            _table =
                 (TableAttribute) criteria.GetType().GetCustomAttributes(typeof (TableAttribute), false).FirstOrDefault();
-            if (table == null)
+            if (_table == null)
             {
                 throw new NullReferenceException(string.Format("Not exists table from criteria {0}",
-                                                               criteria.GetType()));
+                    criteria.GetType()));
             }
             Criteria = criteria;
 
@@ -78,7 +82,10 @@ namespace TsSoft.Dapper.QueryBuilder
 
         protected string CountSql
         {
-            get { return string.Format("Select count(1) from {0} /**innerjoin**/ /**leftjoin**/ /**where**/", TableName); }
+            get
+            {
+                return string.Format("Select count(1) from {0} /**innerjoin**/ /**leftjoin**/ /**where**/", TableName);
+            }
         }
 
         protected string ExistsSql
@@ -88,26 +95,32 @@ namespace TsSoft.Dapper.QueryBuilder
 
         protected virtual string TableName
         {
-            get { return table.Name; }
+            get { return _table.Name; }
         }
 
         protected virtual void Select()
         {
-            Builder.Select(string.Format(@"{0}.*", TableName));
+            var selects = SelectClauseManager.Get(Criteria, TableName);
+            foreach (var selectClause in selects)
+            {
+                Builder.Select(
+                    selectClause.IsExpression
+                        ? selectClause.Select
+                        : string.Format("{0}.{1}", selectClause.Table, selectClause.Select));
+            }
         }
 
         protected virtual void Join()
         {
-            IEnumerable<JoinClause> joinClauses = JoinClauseManager.Get(Criteria, TableName).OrderBy(x =>
-                {
-                    return x.Order == 0 ? int.MaxValue : x.Order;
-                });
-            foreach (JoinClause joinClause in joinClauses)
+            IEnumerable<JoinClause> joinClauses =
+                JoinClauseManager.Get(Criteria, TableName)
+                    .OrderBy(x => x.Order == 0 ? int.MaxValue : x.Order);
+            foreach (var joinClause in joinClauses)
             {
                 Builder.Select(string.Format("0 as {0}", joinClause.Splitter));
                 if (joinClause.HasJoin)
                 {
-                    foreach (string joinSql in joinClause.JoinSqls)
+                    foreach (var joinSql in joinClause.JoinSqls)
                     {
                         switch (joinClause.JoinType)
                         {
@@ -124,7 +137,7 @@ namespace TsSoft.Dapper.QueryBuilder
                                 throw new ArgumentOutOfRangeException();
                         }
                     }
-                    foreach (string selectSql in joinClause.SelectsSql)
+                    foreach (var selectSql in joinClause.SelectsSql)
                     {
                         Builder.Select(selectSql);
                     }
@@ -135,11 +148,11 @@ namespace TsSoft.Dapper.QueryBuilder
 
         protected virtual void Where()
         {
-            IEnumerable<WhereClauseManager.WhereClauseModel> whereClauses = WhereClauseManager.Get(Criteria, TableName);
+            var whereClauses = WhereClauseManager.Get(Criteria, TableName);
             var dbArgs = new DynamicParameters();
 
 
-            foreach (WhereClauseManager.WhereClauseModel whereClause in whereClauses)
+            foreach (var whereClause in whereClauses)
             {
                 if (!whereClause.WithoutValue)
                 {
@@ -190,7 +203,7 @@ namespace TsSoft.Dapper.QueryBuilder
             Where();
             GroupBy();
             OrderBy();
-            SqlBuilder.Template template = GetTemplate();
+            var template = GetTemplate();
             var query = new Query {Sql = template.RawSql, Parameters = template.Parameters, SplitOn = SplitOnString};
             return query;
         }

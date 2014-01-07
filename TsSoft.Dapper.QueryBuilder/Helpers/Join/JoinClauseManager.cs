@@ -7,7 +7,7 @@ using TsSoft.Dapper.QueryBuilder.Models;
 
 namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
 {
-    public class JoinClauseManager
+    public class JoinClauseManager : IClauseManager<JoinClause>
     {
         private readonly IJoinClauseCreatorFactory joinClauseCreatorFactory;
 

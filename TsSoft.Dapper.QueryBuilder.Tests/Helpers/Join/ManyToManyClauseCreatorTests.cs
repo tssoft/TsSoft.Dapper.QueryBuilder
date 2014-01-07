@@ -12,16 +12,16 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
         public void CreateTest()
         {
             var attr = new ManyToManyJoinAttribute("CurrentTableField", JoinType.Left, "JoinedTable",
-                                                   "CommunicationTable", "CommunicationTableCurrentTableField",
-                                                   "CommunicationTableJoinedTableField")
-                {
-                    SelectColumns = "CurrentTable:Id,Name;CommunicationTable:Required;JoinedTable:Id,Name",
-                    CurrentTable = "CurrentTable",
-                    JoinedTableField = "Id",
-                    CurrentTableField = "CurrentTableField",
-                };
+                "CommunicationTable", "CommunicationTableCurrentTableField",
+                "CommunicationTableJoinedTableField")
+            {
+                SelectColumns = "CurrentTable:Id,Name;CommunicationTable:Required;JoinedTable:Id,Name",
+                CurrentTable = "CurrentTable",
+                JoinedTableField = "Id",
+                CurrentTableField = "CurrentTableField",
+            };
             var creator = new ManyToManyClauseCreator();
-            JoinClause res = creator.Create(attr);
+            var res = creator.Create(attr);
             Assert.IsTrue(res.HasJoin);
             Assert.AreEqual(JoinType.Left, res.JoinType);
             Assert.AreEqual(2, res.JoinSqls.Count());
@@ -38,7 +38,7 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
                 "CommunicationTable on CommunicationTable.CommunicationTableCurrentTableField = CurrentTable.CurrentTableField",
                 res.JoinSqls.ToArray()[0]);
             Assert.AreEqual("JoinedTable on JoinedTable.Id = CommunicationTable.CommunicationTableJoinedTableField",
-                            res.JoinSqls.ToArray()[1]);
+                res.JoinSqls.ToArray()[1]);
         }
     }
 }

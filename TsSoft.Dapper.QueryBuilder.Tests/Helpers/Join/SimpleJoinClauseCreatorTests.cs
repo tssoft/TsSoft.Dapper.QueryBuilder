@@ -14,18 +14,18 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
         {
             var creator = new SimpleJoinClauseCreator();
             var attr = new SimpleJoinAttribute("CurrentTableField", JoinType.Left, "JoinedTable")
-                {
-                    CurrentTable = "CurrentTable",
-                    JoinedTableField = "JoinedField"
-                };
-            JoinClause res = creator.Create(attr);
+            {
+                CurrentTable = "CurrentTable",
+                JoinedTableField = "JoinedField"
+            };
+            var res = creator.Create(attr);
             Assert.AreEqual(JoinType.Left, res.JoinType);
             Assert.AreEqual(1, res.JoinSqls.Count());
             Assert.AreEqual(1, res.SelectsSql.Count());
             Assert.AreEqual("JoinedTable.*", res.SelectsSql.First());
             Assert.AreEqual("SplitOnJoinedTableJoinedField", res.Splitter);
             Assert.AreEqual("JoinedTable on JoinedTable.JoinedField = CurrentTable.CurrentTableField",
-                            res.JoinSqls.First());
+                res.JoinSqls.First());
             Assert.IsTrue(res.HasJoin);
         }
 
@@ -34,11 +34,11 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
         {
             var creator = new SimpleJoinClauseCreator();
             var attr = new SimpleJoinAttribute("CurrentTableField", JoinType.Left, "JoinedTable")
-                {
-                    CurrentTable = "CurrentTable",
-                    JoinedTableField = "JoinedField"
-                };
-            JoinClause res = creator.CreateNotJoin(attr);
+            {
+                CurrentTable = "CurrentTable",
+                JoinedTableField = "JoinedField"
+            };
+            var res = creator.CreateNotJoin(attr);
             Assert.AreEqual(JoinType.Left, res.JoinType);
             Assert.IsTrue(res.JoinSqls == null || !res.JoinSqls.Any());
             Assert.AreEqual("SplitOnJoinedTableJoinedField", res.Splitter);

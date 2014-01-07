@@ -15,15 +15,20 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
                 throw new ArgumentException("Attribute must be ManyToManyJoinAttribute");
             }
 
-            string splitter = string.Format("SplitOn{0}{1}", manyToManyJoinAttribute.JoinedTable,
-                                            manyToManyJoinAttribute.JoinedTableField);
+            var splitter = string.Format("SplitOn{0}{1}", manyToManyJoinAttribute.JoinedTable,
+                manyToManyJoinAttribute.JoinedTableField);
             var selects = new List<string>();
             if (manyToManyJoinAttribute.TableSelectColumns != null && manyToManyJoinAttribute.TableSelectColumns.Any())
             {
                 foreach (var tableSelectColumn in manyToManyJoinAttribute.TableSelectColumns)
                 {
-                    selects.AddRange(
-                        tableSelectColumn.Value.Select(column => string.Format("{0}.{1}", tableSelectColumn.Key, column)));
+                    selects
+                        .AddRange(
+                            tableSelectColumn.Value.Select(
+                                selectClause =>
+                                    selectClause.IsExpression
+                                        ? selectClause.Select
+                                        : string.Format("{0}.{1}", selectClause.Table, selectClause.Select)));
                 }
             }
             else
@@ -32,24 +37,24 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
             }
 
             var joins = new List<string>
-                {
-                    string.Format("{0} on {0}.{1} = {2}.{3}", manyToManyJoinAttribute.CommunicationTable,
-                                  manyToManyJoinAttribute.CommunicationTableCurrentTableField,
-                                  manyToManyJoinAttribute.CurrentTable,
-                                  manyToManyJoinAttribute.CurrentTableField),
-                    string.Format("{0} on {0}.{1} = {2}.{3}", manyToManyJoinAttribute.JoinedTable,
-                                  manyToManyJoinAttribute.JoinedTableField, manyToManyJoinAttribute.CommunicationTable,
-                                  manyToManyJoinAttribute.CommunicationTableJoinedTableField),
-                };
+            {
+                string.Format("{0} on {0}.{1} = {2}.{3}", manyToManyJoinAttribute.CommunicationTable,
+                    manyToManyJoinAttribute.CommunicationTableCurrentTableField,
+                    manyToManyJoinAttribute.CurrentTable,
+                    manyToManyJoinAttribute.CurrentTableField),
+                string.Format("{0} on {0}.{1} = {2}.{3}", manyToManyJoinAttribute.JoinedTable,
+                    manyToManyJoinAttribute.JoinedTableField, manyToManyJoinAttribute.CommunicationTable,
+                    manyToManyJoinAttribute.CommunicationTableJoinedTableField),
+            };
             var result = new JoinClause
-                {
-                    JoinSqls = joins,
-                    SelectsSql = selects,
-                    Splitter = splitter,
-                    JoinType = manyToManyJoinAttribute.JoinType,
-                    HasJoin = true,
-                    Order = joinAttribute.Order,
-                };
+            {
+                JoinSqls = joins,
+                SelectsSql = selects,
+                Splitter = splitter,
+                JoinType = manyToManyJoinAttribute.JoinType,
+                HasJoin = true,
+                Order = joinAttribute.Order,
+            };
             return result;
         }
     }

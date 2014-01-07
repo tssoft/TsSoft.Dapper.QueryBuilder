@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Dapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TsSoft.Dapper.QueryBuilder.Formatters;
+using TsSoft.Dapper.QueryBuilder.Helpers.Select;
 using TsSoft.Dapper.QueryBuilder.Metadata;
 using TsSoft.Dapper.QueryBuilder.Models;
 using TsSoft.Dapper.QueryBuilder.Models.Enumerations;
@@ -20,7 +21,7 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestSimple()
         {
             var builder = new TestQueryBuilder<TestCriteria>(new TestCriteria());
-            Query query = builder.Build();
+            var query = builder.Build();
             Assert.AreEqual("Select TableName.* from TableName", SimplifyString(query.Sql));
             Assert.AreEqual("Id", query.SplitOn);
             DynamicParameters tmp;
@@ -32,14 +33,14 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestWhereEq()
         {
             var builder = new TestQueryBuilder<TestCriteria>(new TestCriteria
-                {
-                    Id = 1,
-                });
-            Query query = builder.Build();
+            {
+                Id = 1,
+            });
+            var query = builder.Build();
             Assert.AreEqual("Select TableName.* from TableName WHERE TableName.Id = @TableNameId",
-                            SimplifyString(query.Sql));
-            DynamicParameters dynamicParameters = ToDynamicParameters(query.Parameters);
-            Dictionary<string, object> parameters = GetKeyValues(dynamicParameters);
+                SimplifyString(query.Sql));
+            var dynamicParameters = ToDynamicParameters(query.Parameters);
+            var parameters = GetKeyValues(dynamicParameters);
 
             Assert.AreEqual(1, dynamicParameters.ParameterNames.Count());
             Assert.AreEqual("TableNameId", dynamicParameters.ParameterNames.Single());
@@ -50,14 +51,14 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestLike()
         {
             var builder = new TestQueryBuilder<TestCriteria>(new TestCriteria
-                {
-                    Name = "123",
-                });
-            Query query = builder.Build();
+            {
+                Name = "123",
+            });
+            var query = builder.Build();
             Assert.AreEqual("Select TableName.* from TableName WHERE TableName.Name Like @TableNameName",
-                            SimplifyString(query.Sql));
-            DynamicParameters dynamicParameters = ToDynamicParameters(query.Parameters);
-            Dictionary<string, object> parameters = GetKeyValues(dynamicParameters);
+                SimplifyString(query.Sql));
+            var dynamicParameters = ToDynamicParameters(query.Parameters);
+            var parameters = GetKeyValues(dynamicParameters);
 
             Assert.AreEqual(1, dynamicParameters.ParameterNames.Count());
             Assert.AreEqual("TableNameName", dynamicParameters.ParameterNames.Single());
@@ -68,15 +69,15 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestGtEq()
         {
             var crit = new TestCriteria
-                {
-                    DateFrom = DateTime.Now,
-                };
+            {
+                DateFrom = DateTime.Now,
+            };
             var builder = new TestQueryBuilder<TestCriteria>(crit);
-            Query query = builder.Build();
+            var query = builder.Build();
             Assert.AreEqual("Select TableName.* from TableName WHERE TableName.Date >= @TableNameDateFrom",
-                            SimplifyString(query.Sql));
-            DynamicParameters dynamicParameters = ToDynamicParameters(query.Parameters);
-            Dictionary<string, object> parameters = GetKeyValues(dynamicParameters);
+                SimplifyString(query.Sql));
+            var dynamicParameters = ToDynamicParameters(query.Parameters);
+            var parameters = GetKeyValues(dynamicParameters);
             Assert.AreEqual(1, dynamicParameters.ParameterNames.Count());
             Assert.AreEqual("TableNameDateFrom", dynamicParameters.ParameterNames.Single());
             Assert.AreEqual(crit.DateFrom, parameters["TableNameDateFrom"]);
@@ -86,17 +87,17 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestGtEqAndLtEq()
         {
             var testCriteria = new TestCriteria
-                {
-                    DateFrom = DateTime.Now,
-                    DateTo = DateTime.Now
-                };
+            {
+                DateFrom = DateTime.Now,
+                DateTo = DateTime.Now
+            };
             var builder = new TestQueryBuilder<TestCriteria>(testCriteria);
-            Query query = builder.Build();
+            var query = builder.Build();
             Assert.AreEqual(
                 "Select TableName.* from TableName WHERE TableName.Date >= @TableNameDateFrom AND TableName.Date <= @TableNameDateTo",
                 SimplifyString(query.Sql));
-            DynamicParameters dynamicParameters = ToDynamicParameters(query.Parameters);
-            Dictionary<string, object> parameters = GetKeyValues(dynamicParameters);
+            var dynamicParameters = ToDynamicParameters(query.Parameters);
+            var parameters = GetKeyValues(dynamicParameters);
             Assert.AreEqual(2, dynamicParameters.ParameterNames.Count());
             Assert.AreEqual("TableNameDateFrom", dynamicParameters.ParameterNames.First());
             Assert.AreEqual("TableNameDateTo", dynamicParameters.ParameterNames.Last());
@@ -108,17 +109,17 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestIn()
         {
             var testCriteria = new TestCriteria
-                {
-                    Codes = new[] {"1", "2", "3"},
-                };
+            {
+                Codes = new[] {"1", "2", "3"},
+            };
             var builder = new TestQueryBuilder<TestCriteria>(testCriteria);
-            Query query = builder.Build();
+            var query = builder.Build();
             Assert.AreEqual(
                 "Select TableName.* from TableName WHERE TableName.Code in @TableNameCodes",
                 SimplifyString(query.Sql));
 
-            DynamicParameters dynamicParameters = ToDynamicParameters(query.Parameters);
-            Dictionary<string, object> parameters = GetKeyValues(dynamicParameters);
+            var dynamicParameters = ToDynamicParameters(query.Parameters);
+            var parameters = GetKeyValues(dynamicParameters);
 
             Assert.AreEqual(1, dynamicParameters.ParameterNames.Count());
             Assert.AreEqual("TableNameCodes", dynamicParameters.ParameterNames.Single());
@@ -129,16 +130,16 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestExpression()
         {
             var testCriteria = new TestCriteria
-                {
-                    DateWithExpression = DateTime.Now,
-                };
+            {
+                DateWithExpression = DateTime.Now,
+            };
             var builder = new TestQueryBuilder<TestCriteria>(testCriteria);
-            Query query = builder.Build();
+            var query = builder.Build();
             Assert.AreEqual(
                 "Select TableName.* from TableName WHERE ((TableName.Date is not null and TableName.Date >= @TableNameDateWithExpression) or (TableName.DateSecond >= @TableNameDateWithExpression))"
                 , SimplifyString(query.Sql));
-            DynamicParameters dynamicParameters = ToDynamicParameters(query.Parameters);
-            Dictionary<string, object> parameters = GetKeyValues(dynamicParameters);
+            var dynamicParameters = ToDynamicParameters(query.Parameters);
+            var parameters = GetKeyValues(dynamicParameters);
             Assert.AreEqual(1, dynamicParameters.ParameterNames.Count());
             Assert.AreEqual("TableNameDateWithExpression", dynamicParameters.ParameterNames.Single());
             Assert.AreEqual(testCriteria.DateWithExpression, parameters["TableNameDateWithExpression"]);
@@ -148,16 +149,16 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestFormatter()
         {
             var testCriteria = new TestCriteria
-                {
-                    DateTimeWithFormatter = DateTime.Now,
-                };
+            {
+                DateTimeWithFormatter = DateTime.Now,
+            };
             var builder = new TestQueryBuilder<TestCriteria>(testCriteria);
-            Query query = builder.Build();
+            var query = builder.Build();
             Assert.AreEqual(
                 "Select TableName.* from TableName WHERE TableName.DateTimeWithFormatter = @TableNameDateTimeWithFormatter"
                 , SimplifyString(query.Sql));
-            DynamicParameters dynamicParameters = ToDynamicParameters(query.Parameters);
-            Dictionary<string, object> parameters = GetKeyValues(dynamicParameters);
+            var dynamicParameters = ToDynamicParameters(query.Parameters);
+            var parameters = GetKeyValues(dynamicParameters);
             Assert.AreEqual(1, dynamicParameters.ParameterNames.Count());
             Assert.AreEqual("TableNameDateTimeWithFormatter", dynamicParameters.ParameterNames.Single());
             Assert.AreEqual("1", parameters["TableNameDateTimeWithFormatter"]);
@@ -167,11 +168,11 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestSimpleJoin()
         {
             var testCriteria = new TestJoinCriteria
-                {
-                    WithAnotherTable = true,
-                };
+            {
+                WithAnotherTable = true,
+            };
             var builder = new TestQueryBuilder<TestJoinCriteria>(testCriteria);
-            Query query = builder.Build();
+            var query = builder.Build();
             Assert.AreEqual(
                 "Select TableName.* , 0 as SplitOnAnotherTableCurrentTableId , AnotherTable.* from TableName LEFT JOIN AnotherTable on AnotherTable.CurrentTableId = TableName.CurrentTableId"
                 , SimplifyString(query.Sql)
@@ -182,11 +183,11 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestSimpleJoinEmpty()
         {
             var testCriteria = new TestJoinCriteria
-                {
-                    WithAnotherTable = false,
-                };
+            {
+                WithAnotherTable = false,
+            };
             var builder = new TestQueryBuilder<TestJoinCriteria>(testCriteria);
-            Query query = builder.Build();
+            var query = builder.Build();
             Assert.AreEqual(
                 "Select TableName.* , 0 as SplitOnAnotherTableCurrentTableId from TableName"
                 , SimplifyString(query.Sql)
@@ -201,7 +202,7 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
                 WithAnotherTable = true,
             };
             var builder = new TestQueryBuilder<TestManyToManyJoinCriteria>(testCriteria);
-            Query query = builder.Build();
+            var query = builder.Build();
             Assert.AreEqual(
                 "Select TableName.* , 0 as SplitOnAnotherTableAnotherId , AnotherTable.* from TableName " +
                 "LEFT JOIN AnotherTableCurrentTable on AnotherTableCurrentTable.CurrentId = TableName.CurrentId " +
@@ -218,7 +219,7 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
                 WithAnotherTable = false,
             };
             var builder = new TestQueryBuilder<TestManyToManyJoinCriteria>(testCriteria);
-            Query query = builder.Build();
+            var query = builder.Build();
             Assert.AreEqual(
                 "Select TableName.* , 0 as SplitOnAnotherTableAnotherId from TableName"
                 , SimplifyString(query.Sql)
@@ -235,7 +236,7 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
                 WithHouses = true,
             };
             var builder = new TestQueryBuilder<TestJoinOrderCriteria>(testCriteria);
-            Query query = builder.Build();
+            var query = builder.Build();
             Assert.AreEqual(
                 "Select Persons.* , 0 as SplitOnCarsPersonId , Cars.* , 0 as SplitOnAirplansPersonId , Airplans.* , 0 as SplitOnHousesPersonId , Houses.* from Persons " +
                 "LEFT JOIN Cars on Cars.PersonId = Persons.Id " +
@@ -243,6 +244,22 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
                 "LEFT JOIN Houses on Houses.PersonId = Persons.Id"
                 , SimplifyString(query.Sql)
                 );
+        }
+
+        [TestMethod]
+        public void TestSelect()
+        {
+            var testCriteria = new TestSelectCriteria
+            {
+               WithSum = true,
+               Select = null,
+               AddSelect = "Shipments:Name,Mass"               
+            };
+            var builder = new TestQueryBuilder<TestSelectCriteria>(testCriteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select Shipments.Name , Shipments.Mass , Sum(Shipments.Price) from Shipments",
+                SimplifyString(query.Sql));
         }
 
         private static string SimplifyString(string str)
@@ -255,24 +272,24 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
 
         private static Dictionary<string, object> GetKeyValues(DynamicParameters dp)
         {
-            BindingFlags all = Enum.GetValues(typeof (BindingFlags))
-                                   .Cast<BindingFlags>()
-                                   .Aggregate((BindingFlags) 0, (flags, bindingFlags) => flags | bindingFlags);
-            FieldInfo fieldInfo = dp.GetType().GetField("parameters", all);
+            var all = Enum.GetValues(typeof (BindingFlags))
+                .Cast<BindingFlags>()
+                .Aggregate((BindingFlags) 0, (flags, bindingFlags) => flags | bindingFlags);
+            var fieldInfo = dp.GetType().GetField("parameters", all);
             if (fieldInfo == null)
             {
                 throw new InvalidOperationException();
             }
-            object paramInfos = fieldInfo.GetValue(dp);
+            var paramInfos = fieldInfo.GetValue(dp);
             var dictionary = new Dictionary<string, object>();
-            foreach (string name in dp.ParameterNames)
+            foreach (var name in dp.ParameterNames)
             {
                 var paramInfo = (paramInfos as IDictionary);
                 if (paramInfo == null)
                 {
                     throw new InvalidOperationException();
                 }
-                object value = paramInfo[name];
+                var value = paramInfo[name];
                 dictionary.Add(name, value.GetType().GetProperty("Value").GetValue(value));
             }
             return dictionary;
@@ -332,6 +349,19 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             public int? Id { get; set; }
         }
 
+        [Table(Name = "Persons")]
+        private class TestJoinOrderCriteria : Criteria
+        {
+            [SimpleJoin("Id", JoinType.Left, "Houses", JoinedTableField = "PersonId")]
+            public bool WithHouses { get; set; }
+
+            [SimpleJoin("Id", JoinType.Left, "Airplans", JoinedTableField = "PersonId", Order = 2)]
+            public bool WithAirplans { get; set; }
+
+            [SimpleJoin("Id", JoinType.Left, "Cars", JoinedTableField = "PersonId", Order = 1)]
+            public bool WithCars { get; set; }
+        }
+
         [Table(Name = "TableName")]
         private class TestManyToManyJoinCriteria : Criteria
         {
@@ -343,17 +373,14 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             public int? Id { get; set; }
         }
 
-        [Table(Name = "Persons")]
-        private class TestJoinOrderCriteria : Criteria
+        [Table(Name = "Shipments")]
+        private class TestSelectCriteria : Criteria
         {
-            [SimpleJoin("Id", JoinType.Left, "Houses", JoinedTableField = "PersonId")]
-            public bool WithHouses { get; set; }
+            [AddSelect]
+            public string AddSelect { get; set; }
 
-            [SimpleJoin("Id", JoinType.Left, "Airplans", JoinedTableField = "PersonId", Order = 2)]
-            public bool WithAirplans { get; set; }
-
-            [SimpleJoin("Id", JoinType.Left, "Cars", JoinedTableField = "PersonId", Order = 1)]            
-            public bool WithCars { get; set; }
+            [AddSelect(SelectColumns = "TableName:{{Sum(Shipments.Price)}}")]
+            public bool WithSum { get; set; }
         }
 
         private class TestQueryBuilder<T> : QueryBuilder<T> where T : Criteria
