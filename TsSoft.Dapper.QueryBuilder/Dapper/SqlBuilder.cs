@@ -6,8 +6,8 @@ namespace Dapper
 {
     public class SqlBuilder
     {
-        private readonly Dictionary<string, Clauses> data = new Dictionary<string, Clauses>();
-        private int seq;
+        private readonly Dictionary<string, Clauses> _data = new Dictionary<string, Clauses>();
+        private int _seq;
 
 
         public Template AddTemplate(string sql, dynamic parameters = null)
@@ -16,16 +16,16 @@ namespace Dapper
         }
 
         private void AddClause(string name, string sql, object parameters, string joiner, string prefix = "",
-                               string postfix = "")
+            string postfix = "")
         {
             Clauses clauses;
-            if (!data.TryGetValue(name, out clauses))
+            if (!_data.TryGetValue(name, out clauses))
             {
                 clauses = new Clauses(joiner, prefix, postfix);
-                data[name] = clauses;
+                _data[name] = clauses;
             }
             clauses.Add(new Clause {Sql = sql, Parameters = parameters});
-            seq++;
+            _seq++;
         }
 
         public SqlBuilder InnerJoin(string sql, dynamic parameters = null)
@@ -88,6 +88,11 @@ namespace Dapper
             return this;
         }
 
+        public void Clear()
+        {
+            _data.Clear();
+        }
+
         private class Clause
         {
             public string Sql { get; set; }
@@ -96,45 +101,45 @@ namespace Dapper
 
         private class Clauses : List<Clause>
         {
-            private readonly string joiner;
-            private readonly string postfix;
-            private readonly string prefix;
+            private readonly string _joiner;
+            private readonly string _postfix;
+            private readonly string _prefix;
 
             public Clauses(string joiner, string prefix = "", string postfix = "")
             {
-                this.joiner = joiner;
-                this.prefix = prefix;
-                this.postfix = postfix;
+                _joiner = joiner;
+                _prefix = prefix;
+                _postfix = postfix;
             }
 
             public string ResolveClauses(DynamicParameters p)
             {
-                foreach (Clause item in this)
+                foreach (var item in this)
                 {
                     p.AddDynamicParams(item.Parameters);
                 }
-                return prefix + string.Join(joiner, this.Select(c => c.Sql)) + postfix;
+                return _prefix + string.Join(_joiner, this.Select(c => c.Sql)) + _postfix;
             }
         }
 
         public class Template
         {
-            private static readonly Regex regex =
+            private static readonly Regex Regex =
                 new Regex(@"\/\*\*.+\*\*\/", RegexOptions.Compiled | RegexOptions.Multiline);
 
-            private readonly SqlBuilder builder;
-            private readonly object initParams;
-            private readonly string sql;
-            private int dataSeq = -1; // Unresolved
+            private readonly SqlBuilder _builder;
+            private readonly object _initParams;
+            private readonly string _sql;
+            private int _dataSeq = -1; // Unresolved
 
-            private object parameters;
-            private string rawSql;
+            private object _parameters;
+            private string _rawSql;
 
             public Template(SqlBuilder builder, string sql, dynamic parameters)
             {
-                initParams = parameters;
-                this.sql = sql;
-                this.builder = builder;
+                _initParams = parameters;
+                _sql = sql;
+                _builder = builder;
             }
 
             public string RawSql
@@ -142,7 +147,7 @@ namespace Dapper
                 get
                 {
                     ResolveSql();
-                    return rawSql;
+                    return _rawSql;
                 }
             }
 
@@ -151,28 +156,28 @@ namespace Dapper
                 get
                 {
                     ResolveSql();
-                    return parameters;
+                    return _parameters;
                 }
             }
 
             private void ResolveSql()
             {
-                if (dataSeq != builder.seq)
+                if (_dataSeq != _builder._seq)
                 {
-                    var p = new DynamicParameters(initParams);
+                    var p = new DynamicParameters(_initParams);
 
-                    rawSql = sql;
+                    _rawSql = _sql;
 
-                    foreach (var pair in builder.data)
+                    foreach (var pair in _builder._data)
                     {
-                        rawSql = rawSql.Replace("/**" + pair.Key + "**/", pair.Value.ResolveClauses(p));
+                        _rawSql = _rawSql.Replace("/**" + pair.Key + "**/", pair.Value.ResolveClauses(p));
                     }
-                    parameters = p;
+                    _parameters = p;
 
                     // replace all that is left with empty
-                    rawSql = regex.Replace(rawSql, "");
+                    _rawSql = Regex.Replace(_rawSql, "");
 
-                    dataSeq = builder.seq;
+                    _dataSeq = _builder._seq;
                 }
             }
         }

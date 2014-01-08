@@ -29,7 +29,7 @@ namespace TsSoft.Dapper.QueryBuilder
         protected SqlBuilder.Template CountTemplate;
         protected SqlBuilder.Template ExistsTemplate;
         protected SqlBuilder.Template PaginateTemplate;
-        protected SqlBuilder.Template SimplyTemplate;
+        protected SqlBuilder.Template SimpleTemplate;
         protected ICollection<string> SplitOn;
         private string _tableName;
 
@@ -49,6 +49,7 @@ namespace TsSoft.Dapper.QueryBuilder
                 throw new NullReferenceException(string.Format("Not exists table from criteria {0}",
                     CriteriaType));
             }
+            Builder = new SqlBuilder();
             Criteria = criteria;
             SplitOn = new List<string>();
         }
@@ -185,7 +186,7 @@ namespace TsSoft.Dapper.QueryBuilder
             switch (criteria.QueryType)
             {
                 case QueryType.Simple:
-                    return SimplyTemplate;
+                    return SimpleTemplate;
                 case QueryType.Paginate:
                     return PaginateTemplate;
                 case QueryType.OnlyCount:
@@ -199,9 +200,8 @@ namespace TsSoft.Dapper.QueryBuilder
 
         private void Init()
         {
-            Builder = new SqlBuilder();
-
-            SimplyTemplate = Builder.AddTemplate(GetSimpleSql());
+            Builder.Clear();
+            SimpleTemplate = Builder.AddTemplate(GetSimpleSql());
             PaginateTemplate = Builder.AddTemplate(GetPaginateSql(), new {Criteria.Skip, Criteria.Take});
             CountTemplate = Builder.AddTemplate(GetCountSql());
             ExistsTemplate = Builder.AddTemplate(GetExistsSql());
