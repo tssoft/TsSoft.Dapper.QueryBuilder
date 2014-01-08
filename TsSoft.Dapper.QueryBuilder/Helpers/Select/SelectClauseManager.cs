@@ -17,7 +17,10 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Select
                 {
                     IsExpression = criteria.SelectClause.IsExpression,
                     Select = criteria.SelectClause.Select,
-                    Table = !string.IsNullOrWhiteSpace(criteria.SelectClause.Table) ? criteria.SelectClause.Table : tableName,
+                    Table =
+                        !string.IsNullOrWhiteSpace(criteria.SelectClause.Table)
+                            ? criteria.SelectClause.Table
+                            : tableName,
                 });
             }
             var type = criteria.GetType();

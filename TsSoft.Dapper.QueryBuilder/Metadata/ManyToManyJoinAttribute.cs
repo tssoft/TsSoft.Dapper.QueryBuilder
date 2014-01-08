@@ -9,8 +9,8 @@ namespace TsSoft.Dapper.QueryBuilder.Metadata
         public readonly string CommunicationTableJoinedTableField;
 
         public ManyToManyJoinAttribute(string currentTableField, JoinType joinType, string joinedTable,
-                                       string communicationTable, string communicationTableCurrentTableField,
-                                       string communicationTableJoinedTableField)
+            string communicationTable, string communicationTableCurrentTableField,
+            string communicationTableJoinedTableField)
             : base(currentTableField, joinType, joinedTable)
         {
             CommunicationTable = communicationTable;

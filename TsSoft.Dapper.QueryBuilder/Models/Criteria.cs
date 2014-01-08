@@ -15,6 +15,7 @@ namespace TsSoft.Dapper.QueryBuilder.Models
                 Select = "*",
             };
         }
+
         public int Take { get; set; }
 
         public int Skip { get; set; }

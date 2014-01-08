@@ -7,7 +7,6 @@ using System.Text.RegularExpressions;
 using Dapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TsSoft.Dapper.QueryBuilder.Formatters;
-using TsSoft.Dapper.QueryBuilder.Helpers.Select;
 using TsSoft.Dapper.QueryBuilder.Metadata;
 using TsSoft.Dapper.QueryBuilder.Models;
 using TsSoft.Dapper.QueryBuilder.Models.Enumerations;
@@ -251,9 +250,9 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         {
             var testCriteria = new TestSelectCriteria
             {
-               WithSum = true,
-               SelectClause = null,
-               AddSelect = "Shipments:Name,Mass"               
+                WithSum = true,
+                SelectClause = null,
+                AddSelect = "Shipments:Name,Mass"
             };
             var builder = new TestQueryBuilder<TestSelectCriteria>(testCriteria);
             var query = builder.Build();
@@ -373,6 +372,14 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             public int? Id { get; set; }
         }
 
+        private class TestQueryBuilder<T> : QueryBuilder<T> where T : Criteria
+        {
+            public TestQueryBuilder(T criteria)
+                : base(criteria)
+            {
+            }
+        }
+
         [Table(Name = "Shipments")]
         private class TestSelectCriteria : Criteria
         {
@@ -381,14 +388,6 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
 
             [AddSelect(SelectColumns = "TableName:{{Sum(Shipments.Price)}}")]
             public bool WithSum { get; set; }
-        }
-
-        private class TestQueryBuilder<T> : QueryBuilder<T> where T : Criteria
-        {
-            public TestQueryBuilder(T criteria)
-                : base(criteria)
-            {
-            }
         }
     }
 }

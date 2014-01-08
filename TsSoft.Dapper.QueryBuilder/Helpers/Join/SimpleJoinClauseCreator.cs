@@ -15,8 +15,8 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
                 throw new ArgumentException("Attribute must be SimpleJoinAttribute");
             }
 
-            string splitter = string.Format("SplitOn{0}{1}", simpleJoinAttribute.JoinedTable,
-                                            simpleJoinAttribute.JoinedTableField);
+            var splitter = string.Format("SplitOn{0}{1}", simpleJoinAttribute.JoinedTable,
+                simpleJoinAttribute.JoinedTableField);
             var selects = new List<string>();
             if (simpleJoinAttribute.TableSelectColumns != null && simpleJoinAttribute.TableSelectColumns.Any())
             {
@@ -30,22 +30,22 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
             {
                 selects.Add(string.Format("{0}.*", simpleJoinAttribute.JoinedTable));
             }
-            string joinSql = string.Format("{0} on {0}.{1} = {2}.{3}", simpleJoinAttribute.JoinedTable,
-                                           simpleJoinAttribute.JoinedTableField, simpleJoinAttribute.CurrentTable,
-                                           simpleJoinAttribute.CurrentTableField);
+            var joinSql = string.Format("{0} on {0}.{1} = {2}.{3}", simpleJoinAttribute.JoinedTable,
+                simpleJoinAttribute.JoinedTableField, simpleJoinAttribute.CurrentTable,
+                simpleJoinAttribute.CurrentTableField);
 
             var result = new JoinClause
+            {
+                JoinSqls = new List<string>
                 {
-                    JoinSqls = new List<string>
-                        {
-                            joinSql,
-                        },
-                    SelectsSql = selects,
-                    Splitter = splitter,
-                    JoinType = simpleJoinAttribute.JoinType,
-                    HasJoin = true,
-                    Order = joinAttribute.Order
-                };
+                    joinSql,
+                },
+                SelectsSql = selects,
+                Splitter = splitter,
+                JoinType = simpleJoinAttribute.JoinType,
+                HasJoin = true,
+                Order = joinAttribute.Order
+            };
             return result;
         }
     }
