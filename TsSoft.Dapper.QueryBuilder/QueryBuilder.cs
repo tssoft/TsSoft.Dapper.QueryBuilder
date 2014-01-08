@@ -14,6 +14,15 @@ namespace TsSoft.Dapper.QueryBuilder
 {
     public class QueryBuilder<TCriteria> where TCriteria : Criteria
     {
+        private const string SimpleSqlTemplate =
+            @"Select /**select**/ from {0} /**innerjoin**/ /**leftjoin**/ /**where**/ /**groupby**/ /**orderby**/";
+
+        private const string ExistsSqlTemplate = "Select 1 from {0} /**innerjoin**/ /**leftjoin**/ /**where**/";
+        private const string CountSqlTemplate = "Select count(1) from {0} /**innerjoin**/ /**leftjoin**/ /**where**/";
+
+        private const string PaginateSqlTemplate =
+            @"Select /**select**/ from {0} /**innerjoin**/ /**leftjoin**/ /**where**/ /**groupby**/ /**orderby**/ OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY";
+
         private static readonly TableAttribute _table;
         protected SqlBuilder Builder;
         protected SqlBuilder.Template CountTemplate;
@@ -40,13 +49,6 @@ namespace TsSoft.Dapper.QueryBuilder
             }
             Criteria = criteria;
 
-            Builder = new SqlBuilder();
-
-            SimplyTemplate = Builder.AddTemplate(SimpleSql);
-            PaginateTemplate = Builder.AddTemplate(PaginateSql, new {Criteria.Skip, Criteria.Take});
-            CountTemplate = Builder.AddTemplate(CountSql);
-            ExistsTemplate = Builder.AddTemplate(ExistsSql);
-
             SplitOn = new List<string>();
         }
 
@@ -61,49 +63,40 @@ namespace TsSoft.Dapper.QueryBuilder
 
         public TCriteria Criteria { get; private set; }
 
-        protected string SimpleSql
-        {
-            get
-            {
-                return
-                    string.Format(
-                        @"Select /**select**/ from {0} /**innerjoin**/ /**leftjoin**/ /**where**/ /**groupby**/ /**orderby**/",
-                        TableName);
-            }
-        }
-
-        protected string PaginateSql
-        {
-            get
-            {
-                return
-                    string.Format(
-                        @"Select /**select**/ from {0} /**innerjoin**/ /**leftjoin**/ /**where**/ /**groupby**/ /**orderby**/ OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY",
-                        TableName);
-            }
-        }
-
-        protected string CountSql
-        {
-            get
-            {
-                return string.Format("Select count(1) from {0} /**innerjoin**/ /**leftjoin**/ /**where**/", TableName);
-            }
-        }
-
-        protected string ExistsSql
-        {
-            get { return string.Format("Select 1 from {0} /**innerjoin**/ /**leftjoin**/ /**where**/", TableName); }
-        }
-
         protected virtual string TableName
         {
             get { return _table.Name; }
         }
 
-        protected virtual void Select()
+        protected virtual string GetSimpleSql()
         {
-            var selects = SelectClauseManager.Get(Criteria, TableName);
+            return
+                string.Format(
+                    SimpleSqlTemplate,
+                    TableName);
+        }
+
+        protected virtual string GetPaginateSql()
+        {
+            return
+                string.Format(
+                    PaginateSqlTemplate,
+                    TableName);
+        }
+
+        protected virtual string GetCountSql()
+        {
+            return string.Format(CountSqlTemplate, TableName);
+        }
+
+        protected virtual string GetExistsSql()
+        {
+            return string.Format(ExistsSqlTemplate, TableName);
+        }
+
+        protected virtual void Select(TCriteria criteria)
+        {
+            var selects = SelectClauseManager.Get(criteria, TableName);
             foreach (var selectClause in selects)
             {
                 Builder.Select(
@@ -113,10 +106,10 @@ namespace TsSoft.Dapper.QueryBuilder
             }
         }
 
-        protected virtual void Join()
+        protected virtual void Join(TCriteria criteria)
         {
             IEnumerable<JoinClause> joinClauses =
-                JoinClauseManager.Get(Criteria, TableName)
+                JoinClauseManager.Get(criteria, TableName)
                     .OrderBy(x => x.Order == 0 ? int.MaxValue : x.Order);
             foreach (var joinClause in joinClauses)
             {
@@ -149,9 +142,9 @@ namespace TsSoft.Dapper.QueryBuilder
             }
         }
 
-        protected virtual void Where()
+        protected virtual void Where(TCriteria criteria)
         {
-            var whereClauses = WhereClauseManager.Get(Criteria, TableName);
+            var whereClauses = WhereClauseManager.Get(criteria, TableName);
             var dbArgs = new DynamicParameters();
 
 
@@ -167,24 +160,24 @@ namespace TsSoft.Dapper.QueryBuilder
             Builder.AddParameters(dbArgs);
         }
 
-        protected virtual void GroupBy()
+        protected virtual void GroupBy(TCriteria criteria)
         {
         }
 
-        protected virtual void OrderBy()
+        protected virtual void OrderBy(TCriteria criteria)
         {
-            if (Criteria.HasOrder)
+            if (criteria.HasOrder)
             {
-                foreach (var order in Criteria.Order)
+                foreach (var order in criteria.Order)
                 {
                     Builder.OrderBy(string.Format("{0} {1}", order.Key, order.Value));
                 }
             }
         }
 
-        protected SqlBuilder.Template GetTemplate()
+        protected SqlBuilder.Template GetTemplate(TCriteria criteria)
         {
-            switch (Criteria.QueryType)
+            switch (criteria.QueryType)
             {
                 case QueryType.Simple:
                     return SimplyTemplate;
@@ -199,14 +192,25 @@ namespace TsSoft.Dapper.QueryBuilder
             }
         }
 
+        private void Init()
+        {
+            Builder = new SqlBuilder();
+
+            SimplyTemplate = Builder.AddTemplate(GetSimpleSql());
+            PaginateTemplate = Builder.AddTemplate(GetPaginateSql(), new {Criteria.Skip, Criteria.Take});
+            CountTemplate = Builder.AddTemplate(GetCountSql());
+            ExistsTemplate = Builder.AddTemplate(GetExistsSql());
+        }
+
         public virtual Query Build()
         {
-            Select();
-            Join();
-            Where();
-            GroupBy();
-            OrderBy();
-            var template = GetTemplate();
+            Init();
+            Select(Criteria);
+            Join(Criteria);
+            Where(Criteria);
+            GroupBy(Criteria);
+            OrderBy(Criteria);
+            var template = GetTemplate(Criteria);
             var query = new Query {Sql = template.RawSql, Parameters = template.Parameters, SplitOn = SplitOnString};
             return query;
         }
