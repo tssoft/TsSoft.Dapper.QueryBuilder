@@ -11,13 +11,13 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Select
         public IEnumerable<SelectClause> Get(Criteria criteria, string tableName)
         {
             var res = new List<SelectClause>();
-            if (criteria.Select != null)
+            if (criteria.SelectClause != null)
             {
                 res.Add(new SelectClause
                 {
-                    IsExpression = criteria.Select.IsExpression,
-                    Select = criteria.Select.Select,
-                    Table = !string.IsNullOrWhiteSpace(criteria.Select.Table) ? criteria.Select.Table : tableName,
+                    IsExpression = criteria.SelectClause.IsExpression,
+                    Select = criteria.SelectClause.Select,
+                    Table = !string.IsNullOrWhiteSpace(criteria.SelectClause.Table) ? criteria.SelectClause.Table : tableName,
                 });
             }
             var type = criteria.GetType();

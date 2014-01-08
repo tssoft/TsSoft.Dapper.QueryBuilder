@@ -9,7 +9,7 @@ namespace TsSoft.Dapper.QueryBuilder.Models
     {
         public Criteria()
         {
-            Select = new SelectClause
+            SelectClause = new SelectClause
             {
                 IsExpression = false,
                 Select = "*",
@@ -23,7 +23,7 @@ namespace TsSoft.Dapper.QueryBuilder.Models
 
         public IDictionary<string, OrderType> Order { get; set; }
 
-        public SelectClause Select { get; set; }
+        public SelectClause SelectClause { get; set; }
 
         public bool HasOrder
         {

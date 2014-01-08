@@ -252,7 +252,7 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             var testCriteria = new TestSelectCriteria
             {
                WithSum = true,
-               Select = null,
+               SelectClause = null,
                AddSelect = "Shipments:Name,Mass"               
             };
             var builder = new TestQueryBuilder<TestSelectCriteria>(testCriteria);
