@@ -24,12 +24,14 @@ namespace TsSoft.Dapper.QueryBuilder
             @"Select /**select**/ from {0} /**innerjoin**/ /**leftjoin**/ /**where**/ /**groupby**/ /**orderby**/ OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY";
 
         private static readonly TableAttribute _table;
+        private static readonly Type CriteriaType = typeof (TCriteria);
         protected SqlBuilder Builder;
         protected SqlBuilder.Template CountTemplate;
         protected SqlBuilder.Template ExistsTemplate;
         protected SqlBuilder.Template PaginateTemplate;
         protected SqlBuilder.Template SimplyTemplate;
         protected ICollection<string> SplitOn;
+        private string _tableName;
 
         static QueryBuilder()
         {
@@ -45,10 +47,9 @@ namespace TsSoft.Dapper.QueryBuilder
             if (_table == null)
             {
                 throw new NullReferenceException(string.Format("Not exists table from criteria {0}",
-                    criteria.GetType()));
+                    CriteriaType));
             }
             Criteria = criteria;
-
             SplitOn = new List<string>();
         }
 
@@ -63,9 +64,13 @@ namespace TsSoft.Dapper.QueryBuilder
 
         public TCriteria Criteria { get; private set; }
 
-        protected virtual string TableName
+        protected virtual string GetTableName()
         {
-            get { return _table.Name; }
+            if (string.IsNullOrWhiteSpace(_tableName))
+            {
+                _tableName = _table.Name;
+            }
+            return _tableName;
         }
 
         protected virtual string GetSimpleSql()
@@ -73,7 +78,7 @@ namespace TsSoft.Dapper.QueryBuilder
             return
                 string.Format(
                     SimpleSqlTemplate,
-                    TableName);
+                    GetTableName());
         }
 
         protected virtual string GetPaginateSql()
@@ -81,22 +86,22 @@ namespace TsSoft.Dapper.QueryBuilder
             return
                 string.Format(
                     PaginateSqlTemplate,
-                    TableName);
+                    GetTableName());
         }
 
         protected virtual string GetCountSql()
         {
-            return string.Format(CountSqlTemplate, TableName);
+            return string.Format(CountSqlTemplate, GetTableName());
         }
 
         protected virtual string GetExistsSql()
         {
-            return string.Format(ExistsSqlTemplate, TableName);
+            return string.Format(ExistsSqlTemplate, GetTableName());
         }
 
         protected virtual void Select(TCriteria criteria)
         {
-            var selects = SelectClauseManager.Get(criteria, TableName);
+            var selects = SelectClauseManager.Get(criteria, GetTableName());
             foreach (var selectClause in selects)
             {
                 Builder.Select(
@@ -109,7 +114,7 @@ namespace TsSoft.Dapper.QueryBuilder
         protected virtual void Join(TCriteria criteria)
         {
             IEnumerable<JoinClause> joinClauses =
-                JoinClauseManager.Get(criteria, TableName)
+                JoinClauseManager.Get(criteria, GetTableName())
                     .OrderBy(x => x.Order == 0 ? int.MaxValue : x.Order);
             foreach (var joinClause in joinClauses)
             {
@@ -144,7 +149,7 @@ namespace TsSoft.Dapper.QueryBuilder
 
         protected virtual void Where(TCriteria criteria)
         {
-            var whereClauses = WhereClauseManager.Get(criteria, TableName);
+            var whereClauses = WhereClauseManager.Get(criteria, GetTableName());
             var dbArgs = new DynamicParameters();
 
 
