@@ -46,6 +46,12 @@ namespace Dapper
             return this;
         }
 
+        public SqlBuilder SimpleSql(string sql, dynamic parameters = null)
+        {
+            AddClause("simplesql", sql, parameters, joiner: "\n ", prefix: "\n ", postfix: "\n");
+            return this;
+        }
+
         public SqlBuilder Where(string sql, dynamic parameters = null)
         {
             AddClause("where", sql, parameters, " AND ", prefix: "WHERE ", postfix: "\n");

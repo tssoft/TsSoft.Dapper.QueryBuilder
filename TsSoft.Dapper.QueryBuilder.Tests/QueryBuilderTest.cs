@@ -261,6 +261,22 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
                 SimplifyString(query.Sql));
         }
 
+        [TestMethod]
+        public void TestJoinOrderAnotherJoins()
+        {
+            var criteria = new TestAnotherJoinCriteria
+                {
+                    WithOwner = true,
+                    WithPersons = true,
+                };
+            var builder = new QueryBuilder<TestAnotherJoinCriteria>(criteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select Houses.* , 0 as SplitOnPersonsHouseId , Persons.* , 0 as SplitOnOwnersId , Owners.* from Houses LEFT JOIN Persons on Persons.HouseId = Houses.Id INNER JOIN Owners on Owners.Id = Houses.OwnerId",
+                SimplifyString(query.Sql));
+
+        }
+
         private static string SimplifyString(string str)
         {
             return
@@ -388,6 +404,16 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
 
             [AddSelect(SelectColumns = "TableName:{{Sum(Shipments.Price)}}")]
             public bool WithSum { get; set; }
+        }
+
+        [Table(Name = "Houses")]
+        private class TestAnotherJoinCriteria : Criteria
+        {
+             [SimpleJoin("Id", JoinType.Left, "Persons", JoinedTableField = "HouseId", Order = 1)]
+             public bool WithPersons { get; set; }
+
+             [SimpleJoin("OwnerId", JoinType.Inner, "Owners", JoinedTableField = "Id", Order = 2)]
+             public bool WithOwner { get; set; }
         }
     }
 }

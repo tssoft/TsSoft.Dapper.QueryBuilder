@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Dapper;
 using TsSoft.Dapper.QueryBuilder.Helpers;
 using TsSoft.Dapper.QueryBuilder.Helpers.Join;
@@ -15,13 +16,13 @@ namespace TsSoft.Dapper.QueryBuilder
     public class QueryBuilder<TCriteria> where TCriteria : Criteria
     {
         private const string SimpleSqlTemplate =
-            @"Select /**select**/ from {0} /**innerjoin**/ /**leftjoin**/ /**where**/ /**groupby**/ /**orderby**/";
+            @"Select /**select**/ from {0} /**simplesql**/ /**where**/ /**groupby**/ /**orderby**/";
 
-        private const string ExistsSqlTemplate = "Select 1 from {0} /**innerjoin**/ /**leftjoin**/ /**where**/";
-        private const string CountSqlTemplate = "Select count(1) from {0} /**innerjoin**/ /**leftjoin**/ /**where**/";
+        private const string ExistsSqlTemplate = "Select 1 from {0} /**simplesql**/ /**where**/";
+        private const string CountSqlTemplate = "Select count(1) from {0} /**simplesql**/ /**where**/";
 
         private const string PaginateSqlTemplate =
-            @"Select /**select**/ from {0} /**innerjoin**/ /**leftjoin**/ /**where**/ /**groupby**/ /**orderby**/ OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY";
+            @"Select /**select**/ from {0} /**simplesql**/ /**where**/ /**groupby**/ /**orderby**/ OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY";
 
         private static readonly TableAttribute _table;
         private static readonly Type CriteriaType = typeof (TCriteria);
@@ -122,22 +123,27 @@ namespace TsSoft.Dapper.QueryBuilder
                 Builder.Select(string.Format("0 as {0}", joinClause.Splitter));
                 if (joinClause.HasJoin)
                 {
+                    var sb = new StringBuilder();
                     foreach (var joinSql in joinClause.JoinSqls)
                     {
+                        sb.Clear();
+                        sb.AppendLine();
                         switch (joinClause.JoinType)
                         {
                             case JoinType.Inner:
-                                Builder.InnerJoin(joinSql);
+                                sb.AppendLine("INNER JOIN");
                                 break;
                             case JoinType.Left:
-                                Builder.LeftJoin(joinSql);
+                                sb.AppendLine("LEFT JOIN");
                                 break;
                             case JoinType.Right:
-                                Builder.RightJoin(joinSql);
+                                sb.AppendLine("RIGHT JOIN");
                                 break;
                             default:
                                 throw new ArgumentOutOfRangeException();
                         }
+                        sb.AppendLine(joinSql);
+                        Builder.SimpleSql(sb.ToString());
                     }
                     foreach (var selectSql in joinClause.SelectsSql)
                     {
