@@ -32,6 +32,10 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Where
                 {
                     continue;
                 }
+                if (propertyInfo.PropertyType == typeof (bool) && !(bool)value)
+                {
+                    continue;
+                }
                 var tableName = !string.IsNullOrWhiteSpace(whereAttribute.TableName)
                     ? whereAttribute.TableName
                     : criteriaTableName;

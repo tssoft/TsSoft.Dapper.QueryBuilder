@@ -32,12 +32,12 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestWhereEq()
         {
             var builder = new TestQueryBuilder<TestCriteria>(new TestCriteria
-            {
-                Id = 1,
-            });
+                {
+                    Id = 1,
+                });
             var query = builder.Build();
             Assert.AreEqual("Select TableName.* from TableName WHERE TableName.Id = @TableNameId",
-                SimplifyString(query.Sql));
+                            SimplifyString(query.Sql));
             var dynamicParameters = ToDynamicParameters(query.Parameters);
             var parameters = GetKeyValues(dynamicParameters);
 
@@ -50,12 +50,12 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestLike()
         {
             var builder = new TestQueryBuilder<TestCriteria>(new TestCriteria
-            {
-                Name = "123",
-            });
+                {
+                    Name = "123",
+                });
             var query = builder.Build();
             Assert.AreEqual("Select TableName.* from TableName WHERE TableName.Name Like @TableNameName",
-                SimplifyString(query.Sql));
+                            SimplifyString(query.Sql));
             var dynamicParameters = ToDynamicParameters(query.Parameters);
             var parameters = GetKeyValues(dynamicParameters);
 
@@ -68,13 +68,13 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestGtEq()
         {
             var crit = new TestCriteria
-            {
-                DateFrom = DateTime.Now,
-            };
+                {
+                    DateFrom = DateTime.Now,
+                };
             var builder = new TestQueryBuilder<TestCriteria>(crit);
             var query = builder.Build();
             Assert.AreEqual("Select TableName.* from TableName WHERE TableName.Date >= @TableNameDateFrom",
-                SimplifyString(query.Sql));
+                            SimplifyString(query.Sql));
             var dynamicParameters = ToDynamicParameters(query.Parameters);
             var parameters = GetKeyValues(dynamicParameters);
             Assert.AreEqual(1, dynamicParameters.ParameterNames.Count());
@@ -86,10 +86,10 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestGtEqAndLtEq()
         {
             var testCriteria = new TestCriteria
-            {
-                DateFrom = DateTime.Now,
-                DateTo = DateTime.Now
-            };
+                {
+                    DateFrom = DateTime.Now,
+                    DateTo = DateTime.Now
+                };
             var builder = new TestQueryBuilder<TestCriteria>(testCriteria);
             var query = builder.Build();
             Assert.AreEqual(
@@ -108,9 +108,9 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestIn()
         {
             var testCriteria = new TestCriteria
-            {
-                Codes = new[] {"1", "2", "3"},
-            };
+                {
+                    Codes = new[] {"1", "2", "3"},
+                };
             var builder = new TestQueryBuilder<TestCriteria>(testCriteria);
             var query = builder.Build();
             Assert.AreEqual(
@@ -129,9 +129,9 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestExpression()
         {
             var testCriteria = new TestCriteria
-            {
-                DateWithExpression = DateTime.Now,
-            };
+                {
+                    DateWithExpression = DateTime.Now,
+                };
             var builder = new TestQueryBuilder<TestCriteria>(testCriteria);
             var query = builder.Build();
             Assert.AreEqual(
@@ -148,9 +148,9 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestFormatter()
         {
             var testCriteria = new TestCriteria
-            {
-                DateTimeWithFormatter = DateTime.Now,
-            };
+                {
+                    DateTimeWithFormatter = DateTime.Now,
+                };
             var builder = new TestQueryBuilder<TestCriteria>(testCriteria);
             var query = builder.Build();
             Assert.AreEqual(
@@ -167,9 +167,9 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestSimpleJoin()
         {
             var testCriteria = new TestJoinCriteria
-            {
-                WithAnotherTable = true,
-            };
+                {
+                    WithAnotherTable = true,
+                };
             var builder = new TestQueryBuilder<TestJoinCriteria>(testCriteria);
             var query = builder.Build();
             Assert.AreEqual(
@@ -182,9 +182,9 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestSimpleJoinEmpty()
         {
             var testCriteria = new TestJoinCriteria
-            {
-                WithAnotherTable = false,
-            };
+                {
+                    WithAnotherTable = false,
+                };
             var builder = new TestQueryBuilder<TestJoinCriteria>(testCriteria);
             var query = builder.Build();
             Assert.AreEqual(
@@ -197,9 +197,9 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestManyToManyJoin()
         {
             var testCriteria = new TestManyToManyJoinCriteria
-            {
-                WithAnotherTable = true,
-            };
+                {
+                    WithAnotherTable = true,
+                };
             var builder = new TestQueryBuilder<TestManyToManyJoinCriteria>(testCriteria);
             var query = builder.Build();
             Assert.AreEqual(
@@ -214,9 +214,9 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestManyToManyJoinEmpty()
         {
             var testCriteria = new TestManyToManyJoinCriteria
-            {
-                WithAnotherTable = false,
-            };
+                {
+                    WithAnotherTable = false,
+                };
             var builder = new TestQueryBuilder<TestManyToManyJoinCriteria>(testCriteria);
             var query = builder.Build();
             Assert.AreEqual(
@@ -229,11 +229,11 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestJoinOrder()
         {
             var testCriteria = new TestJoinOrderCriteria
-            {
-                WithAirplans = true,
-                WithCars = true,
-                WithHouses = true,
-            };
+                {
+                    WithAirplans = true,
+                    WithCars = true,
+                    WithHouses = true,
+                };
             var builder = new TestQueryBuilder<TestJoinOrderCriteria>(testCriteria);
             var query = builder.Build();
             Assert.AreEqual(
@@ -249,11 +249,11 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         public void TestSelect()
         {
             var testCriteria = new TestSelectCriteria
-            {
-                WithSum = true,
-                SelectClause = null,
-                AddSelect = "Shipments:Name,Mass"
-            };
+                {
+                    WithSum = true,
+                    SelectClause = null,
+                    AddSelect = "Shipments:Name,Mass"
+                };
             var builder = new TestQueryBuilder<TestSelectCriteria>(testCriteria);
             var query = builder.Build();
             Assert.AreEqual(
@@ -274,7 +274,6 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             Assert.AreEqual(
                 "Select Houses.* , 0 as SplitOnPersonsHouseId , Persons.* , 0 as SplitOnOwnersId , Owners.* from Houses LEFT JOIN Persons on Persons.HouseId = Houses.Id INNER JOIN Owners on Owners.Id = Houses.OwnerId",
                 SimplifyString(query.Sql));
-
         }
 
         private static string SimplifyString(string str)
@@ -288,8 +287,8 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         private static Dictionary<string, object> GetKeyValues(DynamicParameters dp)
         {
             var all = Enum.GetValues(typeof (BindingFlags))
-                .Cast<BindingFlags>()
-                .Aggregate((BindingFlags) 0, (flags, bindingFlags) => flags | bindingFlags);
+                          .Cast<BindingFlags>()
+                          .Aggregate((BindingFlags) 0, (flags, bindingFlags) => flags | bindingFlags);
             var fieldInfo = dp.GetType().GetField("parameters", all);
             if (fieldInfo == null)
             {
@@ -315,12 +314,64 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             return o as DynamicParameters;
         }
 
+        [TestMethod]
+        public void TestMultipleJoin()
+        {
+            var criteria = new TestMultipleJoinCriteria
+                {
+                    WithPersonsAndPersonInfo = true
+                };
+            var builder = new QueryBuilder<TestMultipleJoinCriteria>(criteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select Houses.* , 0 as SplitOnPersonsHouseId , Persons.* , 0 as SplitOnPersonInfosPersonId , PersonInfos.* from Houses LEFT JOIN Persons on Persons.HouseId = Houses.Id INNER JOIN PersonInfos on PersonInfos.PersonId = Persons.Id",
+                SimplifyString(query.Sql));
+        }
+
+        [TestMethod]
+        public void BoolWhereCriteriaTrueTest()
+        {
+            var criteria = new TestWhereBoolCriteria
+                {
+                    OnlySingleStorey = true,
+                };
+            var builder = new QueryBuilder<TestWhereBoolCriteria>(criteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select Houses.* from Houses WHERE (Houses.FloorsCount = 1)",
+                SimplifyString(query.Sql));
+        }
+
+        [TestMethod]
+        public void BoolWhereCriteriaFalseTest()
+        {
+            var criteria = new TestWhereBoolCriteria
+                {
+                    OnlySingleStorey = false,
+                };
+            var builder = new QueryBuilder<TestWhereBoolCriteria>(criteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select Houses.* from Houses",
+                SimplifyString(query.Sql));
+        }
+
         private class FormatterTest : IFormatter
         {
             public void Format(ref object input)
             {
                 input = "1";
             }
+        }
+
+        [Table(Name = "Houses")]
+        private class TestAnotherJoinCriteria : Criteria
+        {
+            [SimpleJoin("Id", JoinType.Left, "Persons", JoinedTableField = "HouseId", Order = 1)]
+            public bool WithPersons { get; set; }
+
+            [SimpleJoin("OwnerId", JoinType.Inner, "Owners", JoinedTableField = "Id", Order = 2)]
+            public bool WithOwner { get; set; }
         }
 
         [Table(Name = "TableName")]
@@ -388,6 +439,15 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             public int? Id { get; set; }
         }
 
+        [Table(Name = "Houses")]
+        private class TestMultipleJoinCriteria : Criteria
+        {
+            [SimpleJoin("Id", JoinType.Left, "Persons", JoinedTableField = "HouseId", Order = 1)]
+            [SimpleJoin("Id", JoinType.Inner, "PersonInfos", CurrentTable = "Persons", JoinedTableField = "PersonId",
+                Order = 2)]
+            public bool WithPersonsAndPersonInfo { get; set; }
+        }
+
         private class TestQueryBuilder<T> : QueryBuilder<T> where T : Criteria
         {
             public TestQueryBuilder(T criteria)
@@ -407,36 +467,10 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         }
 
         [Table(Name = "Houses")]
-        private class TestAnotherJoinCriteria : Criteria
+        private class TestWhereBoolCriteria : Criteria
         {
-             [SimpleJoin("Id", JoinType.Left, "Persons", JoinedTableField = "HouseId", Order = 1)]
-             public bool WithPersons { get; set; }
-
-             [SimpleJoin("OwnerId", JoinType.Inner, "Owners", JoinedTableField = "Id", Order = 2)]
-             public bool WithOwner { get; set; }
-        }
-
-        [Table(Name = "Houses")]
-        private class TestMultipleJoinCriteria : Criteria
-        {
-            [SimpleJoin("Id", JoinType.Left, "Persons", JoinedTableField = "HouseId", Order = 1)]
-            [SimpleJoin("Id", JoinType.Inner, "PersonInfos", CurrentTable = "Persons", JoinedTableField = "PersonId", Order = 2)]
-            public bool WithPersonsAndPersonInfo { get; set; }
-        }
-
-       [TestMethod]
-        public void TestMultipleJoin()
-        {
-            var criteria = new TestMultipleJoinCriteria
-            {
-                WithPersonsAndPersonInfo = true
-            };
-            var builder = new QueryBuilder<TestMultipleJoinCriteria>(criteria);
-            var query = builder.Build();
-            Assert.AreEqual(
-                "Select Houses.* , 0 as SplitOnPersonsHouseId , Persons.* , 0 as SplitOnPersonInfosPersonId , PersonInfos.* from Houses LEFT JOIN Persons on Persons.HouseId = Houses.Id INNER JOIN PersonInfos on PersonInfos.PersonId = Persons.Id",
-                SimplifyString(query.Sql));
-
+            [Where("FloorsCount", Expression = "/**TableName**/./**FieldName**/ = 1")]
+            public bool OnlySingleStorey { get; set; }
         }
     }
 }
