@@ -6,6 +6,7 @@ using TsSoft.Dapper.QueryBuilder.Models.Enumerations;
 
 namespace TsSoft.Dapper.QueryBuilder.Metadata
 {
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
     public class SimpleJoinAttribute : JoinAttribute
     {
         public readonly string JoinedTable;

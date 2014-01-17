@@ -26,21 +26,24 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
                 {
                     throw new NotImplementedException("Join implemented to only bool properties");
                 }
-                var joinAttribute = propertyInfo.GetCustomAttribute<JoinAttribute>();
-                var joiner = _joinClauseCreatorFactory.Get(joinAttribute.GetType());
-                if (!(bool) propertyInfo.GetValue(criteria, null))
+                var joinAttributes = propertyInfo.GetCustomAttributes<JoinAttribute>();
+                foreach (var joinAttribute in joinAttributes)
                 {
-                    joinClauses.Add(joiner.CreateNotJoin(joinAttribute));
-                    continue;
-                }
+                    var joiner = _joinClauseCreatorFactory.Get(joinAttribute.GetType());
+                    if (!(bool)propertyInfo.GetValue(criteria, null))
+                    {
+                        joinClauses.Add(joiner.CreateNotJoin(joinAttribute));
+                        continue;
+                    }
 
-                joinAttribute.CurrentTable = string.IsNullOrWhiteSpace(joinAttribute.CurrentTable)
-                    ? criteriaTableName
-                    : joinAttribute.CurrentTable;
-                joinAttribute.CurrentTableField = string.IsNullOrWhiteSpace(joinAttribute.CurrentTableField)
-                    ? propertyInfo.Name
-                    : joinAttribute.CurrentTableField;
-                joinClauses.Add(joiner.Create(joinAttribute));
+                    joinAttribute.CurrentTable = string.IsNullOrWhiteSpace(joinAttribute.CurrentTable)
+                        ? criteriaTableName
+                        : joinAttribute.CurrentTable;
+                    joinAttribute.CurrentTableField = string.IsNullOrWhiteSpace(joinAttribute.CurrentTableField)
+                        ? propertyInfo.Name
+                        : joinAttribute.CurrentTableField;
+                    joinClauses.Add(joiner.Create(joinAttribute));
+                }
             }
             return joinClauses;
         }

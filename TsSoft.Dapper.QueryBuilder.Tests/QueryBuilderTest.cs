@@ -415,5 +415,28 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
              [SimpleJoin("OwnerId", JoinType.Inner, "Owners", JoinedTableField = "Id", Order = 2)]
              public bool WithOwner { get; set; }
         }
+
+        [Table(Name = "Houses")]
+        private class TestMultipleJoinCriteria : Criteria
+        {
+            [SimpleJoin("Id", JoinType.Left, "Persons", JoinedTableField = "HouseId", Order = 1)]
+            [SimpleJoin("Id", JoinType.Inner, "PersonInfos", CurrentTable = "Persons", JoinedTableField = "PersonId", Order = 2)]
+            public bool WithPersonsAndPersonInfo { get; set; }
+        }
+
+       [TestMethod]
+        public void TestMultipleJoin()
+        {
+            var criteria = new TestMultipleJoinCriteria
+            {
+                WithPersonsAndPersonInfo = true
+            };
+            var builder = new QueryBuilder<TestMultipleJoinCriteria>(criteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select Houses.* , 0 as SplitOnPersonsHouseId , Persons.* , 0 as SplitOnPersonInfosPersonId , PersonInfos.* from Houses LEFT JOIN Persons on Persons.HouseId = Houses.Id INNER JOIN PersonInfos on PersonInfos.PersonId = Persons.Id",
+                SimplifyString(query.Sql));
+
+        }
     }
 }
