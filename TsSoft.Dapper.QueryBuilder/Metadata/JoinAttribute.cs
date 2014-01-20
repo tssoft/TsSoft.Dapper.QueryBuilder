@@ -19,5 +19,7 @@ namespace TsSoft.Dapper.QueryBuilder.Metadata
         public string CurrentTableField { get; set; }
 
         public int Order { get; set; }
+
+        public string Including { get; set; }
     }
 }

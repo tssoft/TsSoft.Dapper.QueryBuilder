@@ -494,5 +494,46 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
                 "Select Houses.* from Houses WHERE Houses.OwnerId = @HousesHasOwnerNotThis AND Houses.OwnerId is not null",
                 SimplifyString(query.Sql));
         }
+
+        [Table("Houses")]
+        private class TestIncludingCriteria : Criteria
+        {
+            [SimpleJoin("OwnerId", JoinType.Left, "Owners", JoinedTableField = "Id", Including = "WithOwners", SelectColumns = "Owners:")]
+            [Where("OwnerName", TableName = "Owners", WhereType = WhereType.Like)]
+            public string OwnerName { get; set; }
+
+            [SimpleJoin("OwnerId", JoinType.Left, "Owners", JoinedTableField = "Id")]
+            public bool WithOwners { get; set; }
+        }
+
+        [TestMethod]
+        public void TestIncludingIncludingFieldIsExists()
+        {
+            var testCriteria = new TestIncludingCriteria
+            {
+                OwnerName = "Vasya",
+                WithOwners = true,
+            };
+            var builder = new TestQueryBuilder<TestIncludingCriteria>(testCriteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select Houses.* , 0 as SplitOnOwnersId , Owners.* from Houses LEFT JOIN Owners on Owners.Id = Houses.OwnerId WHERE Owners.OwnerName Like @OwnersOwnerName",
+                SimplifyString(query.Sql));
+        }
+
+        [TestMethod]
+        public void TestIncludingIncludingFieldIsNotExists()
+        {
+            var testCriteria = new TestIncludingCriteria
+            {
+                OwnerName = "Vasya",
+                WithOwners = false,
+            };
+            var builder = new TestQueryBuilder<TestIncludingCriteria>(testCriteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select Houses.* , 0 as SplitOnOwnersId from Houses LEFT JOIN Owners on Owners.Id = Houses.OwnerId WHERE Owners.OwnerName Like @OwnersOwnerName",
+                SimplifyString(query.Sql));
+        }
     }
 }
