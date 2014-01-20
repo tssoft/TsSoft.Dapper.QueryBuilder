@@ -472,5 +472,27 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             [Where("FloorsCount", Expression = "/**TableName**/./**FieldName**/ = 1")]
             public bool OnlySingleStorey { get; set; }
         }
+
+        [Table(Name = "Houses")]
+        private class TestWhereMultipleCriteria : Criteria
+        {
+            [Where("OwnerId")]
+            [Where("OwnerId", WhereType = WhereType.IsNotNull)]
+            public Guid? HasOwnerNotThis { get; set; } 
+        }
+
+        [TestMethod]
+        public void TestWhereMultiple()
+        {
+            var testCriteria = new TestWhereMultipleCriteria
+            {
+                HasOwnerNotThis = Guid.NewGuid()
+            };
+            var builder = new TestQueryBuilder<TestWhereMultipleCriteria>(testCriteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select Houses.* from Houses WHERE Houses.OwnerId = @HousesHasOwnerNotThis AND Houses.OwnerId is not null",
+                SimplifyString(query.Sql));
+        }
     }
 }

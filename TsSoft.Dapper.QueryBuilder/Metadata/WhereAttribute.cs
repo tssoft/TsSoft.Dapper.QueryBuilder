@@ -3,6 +3,7 @@ using TsSoft.Dapper.QueryBuilder.Models.Enumerations;
 
 namespace TsSoft.Dapper.QueryBuilder.Metadata
 {
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
     public class WhereAttribute : Attribute
     {
         public WhereAttribute(string field) : this()
