@@ -14,8 +14,7 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
             {
                 throw new ArgumentException("Attribute must be SimpleJoinAttribute");
             }
-            var splitter = string.Format("SplitOn{0}{1}", simpleJoinAttribute.JoinedTable,
-                simpleJoinAttribute.JoinedTableField);
+            var splitter = GetSplitter(simpleJoinAttribute);
             return new JoinClause
             {
                 HasJoin = false,
@@ -23,6 +22,12 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
                 JoinType = simpleJoinAttribute.JoinType,
                 Order = joinAttribute.Order
             };
+        }
+
+        protected string GetSplitter(SimpleJoinAttribute joinAttribute)
+        {
+            return joinAttribute.NoSplit ? string.Empty : string.Format("SplitOn{0}{1}", joinAttribute.JoinedTable,
+                joinAttribute.JoinedTableField);
         }
     }
 }

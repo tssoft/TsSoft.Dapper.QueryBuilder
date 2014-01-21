@@ -21,5 +21,7 @@ namespace TsSoft.Dapper.QueryBuilder.Metadata
         public int Order { get; set; }
 
         public string Including { get; set; }
+
+        public bool NoSplit { get; set; }
     }
 }

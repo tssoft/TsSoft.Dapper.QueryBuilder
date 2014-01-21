@@ -491,7 +491,7 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             var builder = new TestQueryBuilder<TestWhereMultipleCriteria>(testCriteria);
             var query = builder.Build();
             Assert.AreEqual(
-                "Select Houses.* from Houses WHERE Houses.OwnerId = @HousesHasOwnerNotThis AND Houses.OwnerId is not null",
+                "Select Houses.* from Houses WHERE Houses.OwnerId is not null AND Houses.OwnerId = @HousesHasOwnerNotThis",
                 SimplifyString(query.Sql));
         }
 
@@ -554,6 +554,32 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             Assert.AreEqual(
                 "Select Houses.* , 0 as SplitOnPersonsHouseId , Persons.* from Houses LEFT JOIN Persons on Persons.HouseId = Houses.HouseId",
                 SimplifyString(query.Sql));
+        }
+
+        [TestMethod]
+        public void JoinNoSplitTest()
+        {
+            var testCriteria = new JoinNoSplitCriteria
+            {
+                OwnerId = 1
+            };
+            var builder = new TestQueryBuilder<JoinNoSplitCriteria>(testCriteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select Houses.* , 0 as SplitOnOwnersId from Houses LEFT JOIN HouseOwners on HouseOwners.HouseId = Houses.Id WHERE HouseOwners.OwnerId = @HouseOwnersOwnerId",
+                SimplifyString(query.Sql));
+            
+        }
+
+        [Table("Houses")]
+        private class JoinNoSplitCriteria : Criteria
+        {
+            [SimpleJoin("Id", JoinType.Left, "HouseOwners", JoinedTableField = "HouseId", SelectColumns = "HouseOwners:", NoSplit = true, Including = "WithOwners")]
+            [Where("OwnerId", TableName = "HouseOwners")]
+            public int? OwnerId { get; set; }
+
+            [ManyToManyJoin("Id", JoinType.Left, "Owners", "HouseOwners", "HouseId", "OwnerId", JoinedTableField = "Id")]
+            public bool WithOwners { get; set; }
         }
     }
 }

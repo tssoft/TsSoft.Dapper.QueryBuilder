@@ -15,8 +15,7 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
                 throw new ArgumentException("Attribute must be ManyToManyJoinAttribute");
             }
 
-            var splitter = string.Format("SplitOn{0}{1}", manyToManyJoinAttribute.JoinedTable,
-                manyToManyJoinAttribute.JoinedTableField);
+            var splitter = GetSplitter(manyToManyJoinAttribute);
             var selects = new List<string>();
             if (manyToManyJoinAttribute.TableSelectColumns != null && manyToManyJoinAttribute.TableSelectColumns.Any())
             {

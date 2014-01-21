@@ -120,7 +120,10 @@ namespace TsSoft.Dapper.QueryBuilder
                     .OrderBy(x => x.Order == 0 ? int.MaxValue : x.Order);
             foreach (var joinClause in joinClauses)
             {
-                Builder.Select(string.Format("0 as {0}", joinClause.Splitter));
+                if (!string.IsNullOrWhiteSpace(joinClause.Splitter))
+                {
+                    Builder.Select(string.Format("0 as {0}", joinClause.Splitter));                    
+                }
                 if (joinClause.HasJoin)
                 {
                     var sb = new StringBuilder();

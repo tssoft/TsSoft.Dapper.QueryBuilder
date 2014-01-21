@@ -15,8 +15,7 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
                 throw new ArgumentException("Attribute must be SimpleJoinAttribute");
             }
 
-            var splitter = string.Format("SplitOn{0}{1}", simpleJoinAttribute.JoinedTable,
-                simpleJoinAttribute.JoinedTableField);
+            var splitter = GetSplitter(simpleJoinAttribute);
             var selects = new List<string>();
             if (simpleJoinAttribute.TableSelectColumns != null && simpleJoinAttribute.TableSelectColumns.Any())
             {
