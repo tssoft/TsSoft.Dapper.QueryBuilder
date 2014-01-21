@@ -61,7 +61,7 @@ namespace TsSoft.Dapper.QueryBuilder
 
         protected string SplitOnString
         {
-            get { return SplitOn.All(x => x.Equals("Id")) ? "Id" : string.Join(",", SplitOn); }
+            get { return SplitOn.All(x => x.Equals("Id")) ? "Id" : string.Join(",", SplitOn.Where(x => !string.IsNullOrWhiteSpace(x))); }
         }
 
         public TCriteria Criteria { get; private set; }

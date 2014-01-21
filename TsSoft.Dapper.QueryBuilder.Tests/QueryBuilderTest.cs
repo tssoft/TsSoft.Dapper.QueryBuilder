@@ -568,6 +568,7 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             Assert.AreEqual(
                 "Select Houses.* , 0 as SplitOnOwnersId from Houses LEFT JOIN HouseOwners on HouseOwners.HouseId = Houses.Id WHERE HouseOwners.OwnerId = @HouseOwnersOwnerId",
                 SimplifyString(query.Sql));
+            Assert.AreEqual("SplitOnOwnersId", query.SplitOn);
             
         }
 
