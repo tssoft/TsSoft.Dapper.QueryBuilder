@@ -41,9 +41,9 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
                     manyToManyJoinAttribute.CommunicationTableCurrentTableField,
                     manyToManyJoinAttribute.CurrentTable,
                     manyToManyJoinAttribute.CurrentTableField),
-                string.Format("{0} on {0}.{1} = {2}.{3}", manyToManyJoinAttribute.JoinedTable,
+                string.Format("{0} on {0}.{1} = {2}.{3}{4}", manyToManyJoinAttribute.JoinedTable,
                     manyToManyJoinAttribute.JoinedTableField, manyToManyJoinAttribute.CommunicationTable,
-                    manyToManyJoinAttribute.CommunicationTableJoinedTableField),
+                    manyToManyJoinAttribute.CommunicationTableJoinedTableField,  GetAddOnClauses(manyToManyJoinAttribute)),
             };
             var result = new JoinClause
             {

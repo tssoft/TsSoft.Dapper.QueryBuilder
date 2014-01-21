@@ -29,9 +29,9 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
             {
                 selects.Add(string.Format("{0}.*", simpleJoinAttribute.JoinedTable));
             }
-            var joinSql = string.Format("{0} on {0}.{1} = {2}.{3}", simpleJoinAttribute.JoinedTable,
+            var joinSql = string.Format("{0} on {0}.{1} = {2}.{3}{4}", simpleJoinAttribute.JoinedTable,
                 simpleJoinAttribute.JoinedTableField, simpleJoinAttribute.CurrentTable,
-                simpleJoinAttribute.CurrentTableField);
+                simpleJoinAttribute.CurrentTableField, GetAddOnClauses(simpleJoinAttribute));
 
             var result = new JoinClause
             {
@@ -43,7 +43,7 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
                 Splitter = splitter,
                 JoinType = simpleJoinAttribute.JoinType,
                 HasJoin = true,
-                Order = joinAttribute.Order
+                Order = joinAttribute.Order,
             };
             return result;
         }

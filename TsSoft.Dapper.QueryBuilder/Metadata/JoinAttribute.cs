@@ -23,5 +23,7 @@ namespace TsSoft.Dapper.QueryBuilder.Metadata
         public string Including { get; set; }
 
         public bool NoSplit { get; set; }
+
+        public string AddOnClause { get; set; }
     }
 }

@@ -582,5 +582,27 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             [ManyToManyJoin("Id", JoinType.Left, "Owners", "HouseOwners", "HouseId", "OwnerId", JoinedTableField = "Id")]
             public bool WithOwners { get; set; }
         }
+
+        [Table("Houses")]
+        private class JoinAddOnCriteria : Criteria
+        {
+            [SimpleJoin("HouseId", JoinType.Left, "Owners", AddOnClause = "Owners.OwnerId in (1,2,3)", SelectColumns = "Owners:")]
+            public bool WithOwners { get; set; }
+        }
+
+        [TestMethod]
+        public void JoinAddOnTest()
+        {
+            var testCriteria = new JoinAddOnCriteria
+            {
+                WithOwners = true
+            };
+            var builder = new TestQueryBuilder<JoinAddOnCriteria>(testCriteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select Houses.* , 0 as SplitOnOwnersHouseId from Houses LEFT JOIN Owners on Owners.HouseId = Houses.HouseId AND Owners.OwnerId in (1,2,3)",
+                SimplifyString(query.Sql));
+            
+        }
     }
 }

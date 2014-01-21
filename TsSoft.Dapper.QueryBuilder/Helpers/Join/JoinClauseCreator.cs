@@ -16,18 +16,27 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
             }
             var splitter = GetSplitter(simpleJoinAttribute);
             return new JoinClause
-            {
-                HasJoin = false,
-                Splitter = splitter,
-                JoinType = simpleJoinAttribute.JoinType,
-                Order = joinAttribute.Order
-            };
+                {
+                    HasJoin = false,
+                    Splitter = splitter,
+                    JoinType = simpleJoinAttribute.JoinType,
+                    Order = joinAttribute.Order,
+                };
         }
 
         protected string GetSplitter(SimpleJoinAttribute joinAttribute)
         {
-            return joinAttribute.NoSplit ? string.Empty : string.Format("SplitOn{0}{1}", joinAttribute.JoinedTable,
-                joinAttribute.JoinedTableField);
+            return joinAttribute.NoSplit
+                       ? string.Empty
+                       : string.Format("SplitOn{0}{1}", joinAttribute.JoinedTable,
+                                       joinAttribute.JoinedTableField);
+        }
+
+        protected string GetAddOnClauses(JoinAttribute joinAttribute)
+        {
+            return string.IsNullOrWhiteSpace(joinAttribute.AddOnClause)
+                       ? string.Empty
+                       : string.Format(" AND {0}", joinAttribute.AddOnClause);
         }
     }
 }
