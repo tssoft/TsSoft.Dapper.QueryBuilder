@@ -13,6 +13,7 @@ namespace TsSoft.Dapper.QueryBuilder.Metadata
         private Type _parserType;
 
         private IDictionary<string, ICollection<SelectClause>> _tableSelectColumns;
+        private string _joinedTableField;
 
         public SimpleJoinAttribute(string currentTableField, JoinType joinType, string joinedTable)
             : base(currentTableField, joinType)
@@ -45,7 +46,11 @@ namespace TsSoft.Dapper.QueryBuilder.Metadata
             }
         }
 
-        public string JoinedTableField { get; set; }
+        public string JoinedTableField
+        {
+            get { return string.IsNullOrWhiteSpace(_joinedTableField) ? CurrentTableField : _joinedTableField; }
+            set { _joinedTableField = value; }
+        }
 
         public string SelectColumns { get; set; }
 

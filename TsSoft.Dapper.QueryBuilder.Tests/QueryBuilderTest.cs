@@ -535,5 +535,25 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
                 "Select Houses.* , 0 as SplitOnOwnersId from Houses LEFT JOIN Owners on Owners.Id = Houses.OwnerId WHERE Owners.OwnerName Like @OwnersOwnerName",
                 SimplifyString(query.Sql));
         }
+        [Table("Houses")]
+        private class JoinWithoutJoinedFieldCriteria : Criteria
+        {
+            [SimpleJoin("HouseId", JoinType.Left, "Persons")]
+            public bool WithPersons { get; set; } 
+        }
+
+        [TestMethod]
+        public void JoinWithoutJoinedField()
+        {
+            var testCriteria = new JoinWithoutJoinedFieldCriteria
+            {
+                WithPersons = true
+            };
+            var builder = new TestQueryBuilder<JoinWithoutJoinedFieldCriteria>(testCriteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select Houses.* , 0 as SplitOnPersonsHouseId , Persons.* from Houses LEFT JOIN Persons on Persons.HouseId = Houses.HouseId",
+                SimplifyString(query.Sql));
+        }
     }
 }
