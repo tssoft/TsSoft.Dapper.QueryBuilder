@@ -583,6 +583,30 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             public bool WithOwners { get; set; }
         }
 
+        [TestMethod]
+        public void JoinNoSplitTest2()
+        {
+            var testCriteria = new JoinNoSplitCriteria2
+            {
+                OwnerId = 1
+            };
+            var builder = new TestQueryBuilder<JoinNoSplitCriteria2>(testCriteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select Houses.* from Houses LEFT JOIN HouseOwners on HouseOwners.HouseId = Houses.Id WHERE HouseOwners.OwnerId = @HouseOwnersOwnerId",
+                SimplifyString(query.Sql));
+            Assert.AreEqual("", query.SplitOn);
+
+        }
+
+        [Table("Houses")]
+        private class JoinNoSplitCriteria2 : Criteria
+        {
+            [SimpleJoin("Id", JoinType.Left, "HouseOwners", JoinedTableField = "HouseId", SelectColumns = "HouseOwners:", NoSplit = true)]
+            [Where("OwnerId", TableName = "HouseOwners")]
+            public int? OwnerId { get; set; }
+        }
+
         [Table("Houses")]
         private class JoinAddOnCriteria : Criteria
         {
