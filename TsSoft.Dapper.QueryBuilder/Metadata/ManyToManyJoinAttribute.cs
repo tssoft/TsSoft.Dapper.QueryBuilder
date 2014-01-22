@@ -18,6 +18,9 @@ namespace TsSoft.Dapper.QueryBuilder.Metadata
             CommunicationTable = communicationTable;
             CommunicationTableCurrentTableField = communicationTableCurrentTableField;
             CommunicationTableJoinedTableField = communicationTableJoinedTableField;
+            AddOnType = AddOnType.ForJoined;
         }
+
+        public AddOnType AddOnType { get; set; }
     }
 }

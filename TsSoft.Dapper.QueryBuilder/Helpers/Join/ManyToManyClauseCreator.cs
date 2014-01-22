@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TsSoft.Dapper.QueryBuilder.Metadata;
+using TsSoft.Dapper.QueryBuilder.Models.Enumerations;
 
 namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
 {
@@ -37,13 +38,8 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
 
             var joins = new List<string>
             {
-                string.Format("{0} on {0}.{1} = {2}.{3}", manyToManyJoinAttribute.CommunicationTable,
-                    manyToManyJoinAttribute.CommunicationTableCurrentTableField,
-                    manyToManyJoinAttribute.CurrentTable,
-                    manyToManyJoinAttribute.CurrentTableField),
-                string.Format("{0} on {0}.{1} = {2}.{3}{4}", manyToManyJoinAttribute.JoinedTable,
-                    manyToManyJoinAttribute.JoinedTableField, manyToManyJoinAttribute.CommunicationTable,
-                    manyToManyJoinAttribute.CommunicationTableJoinedTableField,  GetAddOnClauses(manyToManyJoinAttribute)),
+                CreateJoinCommunication(manyToManyJoinAttribute),
+                CreateJoinJoined(manyToManyJoinAttribute),
             };
             var result = new JoinClause
             {
@@ -55,6 +51,23 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
                 Order = joinAttribute.Order,
             };
             return result;
+        }
+
+        private string CreateJoinCommunication(ManyToManyJoinAttribute manyToManyJoinAttribute)
+        {
+            return string.Format("{0} on {0}.{1} = {2}.{3}{4}", manyToManyJoinAttribute.CommunicationTable,
+                                 manyToManyJoinAttribute.CommunicationTableCurrentTableField,
+                                 manyToManyJoinAttribute.CurrentTable,
+                                 manyToManyJoinAttribute.CurrentTableField,
+                                 manyToManyJoinAttribute.AddOnType == AddOnType.ForCommunication ? GetAddOnClauses(manyToManyJoinAttribute) : string.Empty);
+        }
+
+        private string CreateJoinJoined(ManyToManyJoinAttribute manyToManyJoinAttribute)
+        {
+            return string.Format("{0} on {0}.{1} = {2}.{3}{4}", manyToManyJoinAttribute.JoinedTable,
+                          manyToManyJoinAttribute.JoinedTableField, manyToManyJoinAttribute.CommunicationTable,
+                          manyToManyJoinAttribute.CommunicationTableJoinedTableField,
+                          manyToManyJoinAttribute.AddOnType == AddOnType.ForJoined ? GetAddOnClauses(manyToManyJoinAttribute) : string.Empty);
         }
     }
 }

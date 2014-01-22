@@ -59,6 +59,7 @@
     <Compile Include="Helpers\Join\ManyToManyClauseCreator.cs" />
     <Compile Include="Helpers\Join\SimpleJoinClauseCreator.cs" />
     <Compile Include="Helpers\SelectParser.cs" />
+    <Compile Include="Models\Enumerations\AddOnType.cs" />
     <Compile Include="Metadata\AddSelectAttribute.cs" />
     <Compile Include="Helpers\Select\SelectClause.cs" />
     <Compile Include="Helpers\Select\SelectClauseManager.cs" />

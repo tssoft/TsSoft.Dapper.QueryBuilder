@@ -32,7 +32,7 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
                                        joinAttribute.JoinedTableField);
         }
 
-        protected string GetAddOnClauses(JoinAttribute joinAttribute)
+        protected virtual string GetAddOnClauses(JoinAttribute joinAttribute)
         {
             return string.IsNullOrWhiteSpace(joinAttribute.AddOnClause)
                        ? string.Empty
