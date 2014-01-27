@@ -27,12 +27,15 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Select
             var props = type.GetProperties().Where(pi => pi.HasAttribute<AddSelectAttribute>());
             foreach (var propertyInfo in props)
             {
-                if (propertyInfo.PropertyType != typeof (bool) && propertyInfo.PropertyType != typeof (string))
+                var propIsBool = propertyInfo.PropertyType == typeof (bool);
+                var propIsNullable = propertyInfo.PropertyType.IsGenericType && propertyInfo.PropertyType.GetGenericTypeDefinition() == typeof (Nullable<>);
+                var propIsString = propertyInfo.PropertyType == typeof (string);
+                if (!propIsBool && !propIsString && !propIsNullable)
                 {
-                    throw new NotImplementedException("Select implemented to only bool or string properties");
+                    throw new NotImplementedException("Select implemented to only bool or string or nullable properties");
                 }
                 var addSelectAttribute = propertyInfo.GetCustomAttribute<AddSelectAttribute>();
-                if (propertyInfo.PropertyType == typeof (bool))
+                if (propIsBool)
                 {
                     if (!(bool) propertyInfo.GetValue(criteria, null))
                     {
@@ -43,7 +46,18 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Select
                         res.AddRange(tableSelectColumn.Value);
                     }
                 }
-                else if (propertyInfo.PropertyType == typeof (string))
+                else if (propIsNullable)
+                {
+                    if (propertyInfo.GetValue(criteria, null) == null)
+                    {
+                        continue;
+                    }
+                    foreach (var tableSelectColumn in addSelectAttribute.TableSelectColumns)
+                    {
+                        res.AddRange(tableSelectColumn.Value);
+                    }
+                }
+                else if (propIsString)
                 {
                     var str = (string) propertyInfo.GetValue(criteria, null);
                     if (string.IsNullOrWhiteSpace(str))

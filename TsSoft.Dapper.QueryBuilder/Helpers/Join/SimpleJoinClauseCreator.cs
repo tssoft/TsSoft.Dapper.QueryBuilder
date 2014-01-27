@@ -22,7 +22,12 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
                 foreach (var tableSelectColumn in simpleJoinAttribute.TableSelectColumns)
                 {
                     selects.AddRange(
-                        tableSelectColumn.Value.Select(column => string.Format("{0}.{1}", tableSelectColumn.Key, column)));
+                        tableSelectColumn.Value.Select(column =>
+                            {
+                                return column.IsExpression
+                                           ? column.Select
+                                           : string.Format("{0}.{1}", column.Table, column.Select);
+                            }));
                 }
             }
             else

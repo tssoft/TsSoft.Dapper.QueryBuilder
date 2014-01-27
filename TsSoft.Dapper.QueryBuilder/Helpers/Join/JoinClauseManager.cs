@@ -53,7 +53,7 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
                         }
                         var includedPropIsNullable = includedProp.PropertyType == typeof(string) ||
                                                      includedProp.PropertyType.IsGenericType &&
-                                                     propertyInfo.PropertyType.GetGenericTypeDefinition() ==
+                                                     includedProp.PropertyType.GetGenericTypeDefinition() ==
                                                      typeof (Nullable<>);
                         var includedPropIsBool = includedProp.PropertyType == typeof (bool);
 

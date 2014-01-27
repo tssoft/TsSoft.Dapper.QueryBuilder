@@ -650,5 +650,62 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             [ManyToManyJoin("HouseId", JoinType.Left, "People", "HousePeople", "HouseId", "PeopleId", JoinedTableField = "PeopleId", AddOnType = AddOnType.ForCommunication, AddOnClause = "HousesPeople.Required = 1")]
             public bool WithPeople { get; set; }
         }
+
+        [TestMethod]
+        public void SelectNullableTest()
+        {
+            var testCriteria = new SelectNullableCriteria
+                {
+                    Id = 1
+                };
+            var builder = new TestQueryBuilder<SelectNullableCriteria>(testCriteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select Houses.* , Houses.Name from Houses WHERE Houses.Id = @HousesId",
+                SimplifyString(query.Sql));
+        }
+
+        [TestMethod]
+        public void SelectNullableNullTest()
+        {
+            var testCriteria = new SelectNullableCriteria
+            {
+            };
+            var builder = new TestQueryBuilder<SelectNullableCriteria>(testCriteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select Houses.* from Houses",
+                SimplifyString(query.Sql));
+        }
+
+
+        [Table("Houses")]
+        private class SelectNullableCriteria : Criteria
+        {
+            [Where]
+            [AddSelect(SelectColumns = "Houses:Name")]
+            public int? Id { get; set; }
+        }
+
+        [TestMethod]
+        public void JoinSelectTest()
+        {
+            var testCriteria = new JoinSelectCriteria
+            {
+                WithOwners = true
+            };
+            var builder = new TestQueryBuilder<JoinSelectCriteria>(testCriteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select Houses.* , 0 as SplitOnOwnersHouseId , Owners.Name , Owners.Id , Type as OwnerType from Houses LEFT JOIN Owners on Owners.HouseId = Houses.HouseId",
+                SimplifyString(query.Sql));
+        }
+
+        [Table("Houses")]
+        private class JoinSelectCriteria : Criteria
+        {
+            [SimpleJoin("HouseId", JoinType.Left, "Owners", SelectColumns = "Owners:Name,Id,{{Type as OwnerType}}")]
+            public bool WithOwners { get; set; }
+        }
     }
 }
