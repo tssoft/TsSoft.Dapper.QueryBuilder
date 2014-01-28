@@ -23,6 +23,8 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Join
             foreach (var propertyInfo in props)
             {
                 var isNullable = propertyInfo.PropertyType == typeof(string) ||
+                                 propertyInfo.PropertyType.IsClass ||
+                                 propertyInfo.PropertyType.IsInterface ||
                                  propertyInfo.PropertyType.IsGenericType &&
                                  propertyInfo.PropertyType.GetGenericTypeDefinition() == typeof (Nullable<>);
                 var isBool = propertyInfo.PropertyType == typeof (bool);

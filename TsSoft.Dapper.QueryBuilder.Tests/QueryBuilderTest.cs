@@ -707,5 +707,30 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             [SimpleJoin("HouseId", JoinType.Left, "Owners", SelectColumns = "Owners:Name,Id,{{Type as OwnerType}}")]
             public bool WithOwners { get; set; }
         }
+
+        [TestMethod]
+        public void JoinReferenceTest()
+        {
+            var testCriteria = new JoinReferenceCriteria
+            {
+                OwnerIds = new List<int>()
+                    {
+                        1,2,3,4
+                    }
+            };
+            var builder = new TestQueryBuilder<JoinReferenceCriteria>(testCriteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select Houses.* from Houses LEFT JOIN Owners on Owners.HouseId = Houses.HouseId WHERE Owners.Id in @OwnersOwnerIds",
+                SimplifyString(query.Sql));
+        }
+
+        [Table("Houses")]
+        private class JoinReferenceCriteria : Criteria
+        {
+            [SimpleJoin("HouseId", JoinType.Left, "Owners", NoSplit = true, SelectColumns = "Owners:")]
+            [Where("Id", TableName = "Owners", WhereType = WhereType.In)]
+            public IEnumerable<int> OwnerIds { get; set; }
+        }
     }
 }
