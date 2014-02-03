@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Dapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TsSoft.Dapper.QueryBuilder.Formatters;
+using TsSoft.Dapper.QueryBuilder.Helpers.Select;
 using TsSoft.Dapper.QueryBuilder.Metadata;
 using TsSoft.Dapper.QueryBuilder.Models;
 using TsSoft.Dapper.QueryBuilder.Models.Enumerations;
@@ -731,6 +732,30 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             [SimpleJoin("HouseId", JoinType.Left, "Owners", NoSplit = true, SelectColumns = "Owners:")]
             [Where("Id", TableName = "Owners", WhereType = WhereType.In)]
             public IEnumerable<int> OwnerIds { get; set; }
+        }
+
+        [TestMethod]
+        public void GroupByTest()
+        {
+            var testCriteria = new GroupByCriteria
+            {
+                GroupBy = new []{"Houses.OwnerId", "Houses.Category"},
+                SelectClause = new SelectClause
+                    {
+                        Select = "Count(1) , Houses.OwnerId , Houses.Category",
+                        IsExpression = true
+                    }
+            };
+            var builder = new TestQueryBuilder<GroupByCriteria>(testCriteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select Count(1) , Houses.OwnerId , Houses.Category from Houses GROUP BY Houses.OwnerId , Houses.Category",
+                SimplifyString(query.Sql));
+        }
+
+        [Table("Houses")]
+        private class GroupByCriteria : Criteria
+        {
         }
     }
 }

@@ -177,6 +177,13 @@ namespace TsSoft.Dapper.QueryBuilder
 
         protected virtual void GroupBy(TCriteria criteria)
         {
+            if (criteria.HasGrouping)
+            {
+                foreach (var grouping in criteria.GroupBy)
+                {
+                    Builder.GroupBy(grouping);
+                }
+            }
         }
 
         protected virtual void OrderBy(TCriteria criteria)

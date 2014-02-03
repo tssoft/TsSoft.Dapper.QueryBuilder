@@ -10,10 +10,10 @@ namespace TsSoft.Dapper.QueryBuilder.Models
         public Criteria()
         {
             SelectClause = new SelectClause
-            {
-                IsExpression = false,
-                Select = "*",
-            };
+                {
+                    IsExpression = false,
+                    Select = "*",
+                };
         }
 
         public int Take { get; set; }
@@ -30,5 +30,12 @@ namespace TsSoft.Dapper.QueryBuilder.Models
         {
             get { return Order != null && Order.Any(); }
         }
+
+        public bool HasGrouping
+        {
+            get { return GroupBy != null && GroupBy.Any(); }
+        }
+
+        public IEnumerable<string> GroupBy { get; set; }
     }
 }
