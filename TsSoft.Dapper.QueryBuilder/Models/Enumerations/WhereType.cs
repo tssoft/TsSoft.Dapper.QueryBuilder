@@ -24,5 +24,7 @@ namespace TsSoft.Dapper.QueryBuilder.Models.Enumerations
         IsNotNull,
         [Description("in")]
         In,
+        [Description("not in")]
+        NotIn
     }
 }

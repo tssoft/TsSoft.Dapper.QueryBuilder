@@ -19,6 +19,7 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Where
                 case WhereType.LtEq:
                 case WhereType.Like:
                 case WhereType.In:
+                case WhereType.NotIn:
                     return false;
                 case WhereType.IsNull:
                 case WhereType.IsNotNull:
@@ -43,6 +44,7 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Where
                 case WhereType.LtEq:
                 case WhereType.In:
                 case WhereType.Like:
+                case WhereType.NotIn:
                     return string.Format("{0} {1}", GetSelector(whereType), paramName);
                 default:
                     throw new ArgumentOutOfRangeException("whereType");

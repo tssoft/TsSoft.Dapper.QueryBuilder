@@ -27,6 +27,7 @@ namespace TsSoft.Dapper.QueryBuilderTests.Helpers
             Assert.IsFalse(whereAttributeManager.IsWithoutValue(WhereType.Lt));
             Assert.IsFalse(whereAttributeManager.IsWithoutValue(WhereType.LtEq));
             Assert.IsFalse(whereAttributeManager.IsWithoutValue(WhereType.NotEq));
+            Assert.IsFalse(whereAttributeManager.IsWithoutValue(WhereType.NotIn));
 
             Assert.IsTrue(whereAttributeManager.IsWithoutValue(WhereType.IsNotNull));
             Assert.IsTrue(whereAttributeManager.IsWithoutValue(WhereType.IsNull));
@@ -52,6 +53,7 @@ namespace TsSoft.Dapper.QueryBuilderTests.Helpers
             Assert.AreEqual("is null", whereAttributeManager.GetSelector(WhereType.IsNull));
             Assert.AreEqual("is not null", whereAttributeManager.GetSelector(WhereType.IsNotNull));
             Assert.AreEqual("in", whereAttributeManager.GetSelector(WhereType.In));
+            Assert.AreEqual("not in", whereAttributeManager.GetSelector(WhereType.NotIn));
         }
 
         [TestMethod]
@@ -72,6 +74,7 @@ namespace TsSoft.Dapper.QueryBuilderTests.Helpers
             Assert.AreEqual("<= @Name", whereAttributeManager.GetExpression(WhereType.LtEq, "@Name"));
             Assert.AreEqual("Like @Name", whereAttributeManager.GetExpression(WhereType.Like, "@Name"));
             Assert.AreEqual("in @Name", whereAttributeManager.GetExpression(WhereType.In, "@Name"));
+            Assert.AreEqual("not in @Name", whereAttributeManager.GetExpression(WhereType.NotIn, "@Name"));
             Assert.AreEqual("is null", whereAttributeManager.GetExpression(WhereType.IsNull, "@Name"));
             Assert.AreEqual("is not null", whereAttributeManager.GetExpression(WhereType.IsNotNull, "@Name"));
             Assert.AreEqual("is null", whereAttributeManager.GetExpression(WhereType.IsNull, string.Empty));
