@@ -24,7 +24,7 @@ namespace TsSoft.Dapper.QueryBuilder
         private const string PaginateSqlTemplate =
             @"Select /**select**/ from {0} /**simplesql**/ /**where**/ /**groupby**/ /**orderby**/ OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY";
 
-        private static readonly TableAttribute _table;
+        private readonly TableAttribute _table;
         private static readonly Type CriteriaType = typeof (TCriteria);
         protected SqlBuilder Builder;
         protected SqlBuilder.Template CountTemplate;
@@ -39,12 +39,12 @@ namespace TsSoft.Dapper.QueryBuilder
             WhereClauseManager = new WhereClauseManager(new WhereAttributeManager());
             JoinClauseManager = new JoinClauseManager(new JoinClauseCreatorFactory());
             SelectClauseManager = new SelectClauseManager();
-            _table =
-                (TableAttribute) typeof (TCriteria).GetCustomAttributes(typeof (TableAttribute), false).FirstOrDefault();
         }
 
         public QueryBuilder(TCriteria criteria)
         {
+            _table =
+                (TableAttribute) criteria.GetType().GetCustomAttributes(typeof (TableAttribute), false).FirstOrDefault();
             if (_table == null)
             {
                 throw new NullReferenceException(string.Format("Not exists table from criteria {0}",

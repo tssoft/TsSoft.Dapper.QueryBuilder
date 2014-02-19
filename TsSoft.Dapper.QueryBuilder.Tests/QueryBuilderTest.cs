@@ -767,17 +767,16 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
                 CustomerId = 1,
                 WithCustomers = true
             };
-            var builder = new TestQueryBuilder<RealCriteria>(testCriteria);
+            var builder = new TestQueryBuilder<BaseCriteria>(testCriteria);
             var query = builder.Build();
             Assert.AreEqual(
-                "Select RealHouses.* , 0 as SplitOnCustomersCustomerId , Customers.* from RealHouses INNER JOIN Customers on Customers.CustomerId = RealHouses.CustomerId WHERE RealHouses.Id = @RealHousesId AND RealHouses.CustomerId = @RealHousesCustomerId",
+                "Select RealHouses.* , 0 as SplitOnCustomersCustomerId , Customers.* from RealHouses INNER JOIN Customers on Customers.CustomerId = RealHouses.CustomerId WHERE RealHouses.HouseId = @RealHousesId AND RealHouses.CustomerId = @RealHousesCustomerId",
                 SimplifyString(query.Sql));
         }
 
         private abstract class BaseCriteria : Criteria
         {
-            [Where]
-            public Guid? Id { get; set; }
+            public abstract Guid? Id { get; set; }
 
             [Where]
             public int? CustomerId { get; set; }
@@ -789,6 +788,8 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         [Table("RealHouses")]
         private class RealCriteria : BaseCriteria
         {
+            [Where("HouseId")]
+            public override sealed Guid? Id { get; set; }
         }
     }
 }
