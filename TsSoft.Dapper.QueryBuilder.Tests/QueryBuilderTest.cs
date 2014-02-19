@@ -757,5 +757,34 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
         private class GroupByCriteria : Criteria
         {
         }
+
+        [TestMethod]
+        public void BaseTest()
+        {
+            var testCriteria = new RealCriteria
+            {
+                Id = Guid.NewGuid(),
+                CustomerId = 1,
+            };
+            var builder = new TestQueryBuilder<RealCriteria>(testCriteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select RealHouses.* from RealHouses WHERE RealHouses.Id = @RealHousesId AND RealHouses.CustomerId = @RealHousesCustomerId",
+                SimplifyString(query.Sql));
+        }
+
+        private abstract class BaseCriteria : Criteria
+        {
+            [Where]
+            public Guid? Id { get; set; }
+
+            [Where]
+            public int? CustomerId { get; set; }
+        }
+
+        [Table("RealHouses")]
+        private class RealCriteria : BaseCriteria
+        {
+        }
     }
 }
