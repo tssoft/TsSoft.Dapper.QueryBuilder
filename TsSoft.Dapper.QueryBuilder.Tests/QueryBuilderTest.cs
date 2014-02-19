@@ -765,11 +765,12 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             {
                 Id = Guid.NewGuid(),
                 CustomerId = 1,
+                WithCustomers = true
             };
             var builder = new TestQueryBuilder<RealCriteria>(testCriteria);
             var query = builder.Build();
             Assert.AreEqual(
-                "Select RealHouses.* from RealHouses WHERE RealHouses.Id = @RealHousesId AND RealHouses.CustomerId = @RealHousesCustomerId",
+                "Select RealHouses.* , 0 as SplitOnCustomersCustomerId , Customers.* from RealHouses INNER JOIN Customers on Customers.CustomerId = RealHouses.CustomerId WHERE RealHouses.Id = @RealHousesId AND RealHouses.CustomerId = @RealHousesCustomerId",
                 SimplifyString(query.Sql));
         }
 
@@ -780,6 +781,9 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
 
             [Where]
             public int? CustomerId { get; set; }
+
+            [SimpleJoin("CustomerId", JoinType.Inner, "Customers")]
+            public bool WithCustomers { get; set; }
         }
 
         [Table("RealHouses")]
