@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TsSoft.Dapper.QueryBuilder.Metadata;
 using TsSoft.Dapper.QueryBuilder.Models;
+using TsSoft.Dapper.QueryBuilder.Models.Enumerations;
 
 namespace TsSoft.Dapper.QueryBuilder.Helpers.Select
 {
@@ -22,6 +23,10 @@ namespace TsSoft.Dapper.QueryBuilder.Helpers.Select
                             ? criteria.SelectClause.Table
                             : tableName,
                 });
+            }
+            if (criteria.QueryType == QueryType.Sum)
+            {
+                return res;
             }
             var type = criteria.GetType();
             var props = type.GetProperties().Where(pi => pi.HasAttribute<AddSelectAttribute>());

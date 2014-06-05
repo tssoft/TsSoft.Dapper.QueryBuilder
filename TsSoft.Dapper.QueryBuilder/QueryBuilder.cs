@@ -120,7 +120,7 @@ namespace TsSoft.Dapper.QueryBuilder
                     .OrderBy(x => x.Order == 0 ? int.MaxValue : x.Order);
             foreach (var joinClause in joinClauses)
             {
-                if (!string.IsNullOrWhiteSpace(joinClause.Splitter))
+                if (!string.IsNullOrWhiteSpace(joinClause.Splitter) && criteria.QueryType != QueryType.Sum)
                 {
                     Builder.Select(string.Format("0 as {0}", joinClause.Splitter));                    
                 }
@@ -147,6 +147,10 @@ namespace TsSoft.Dapper.QueryBuilder
                         }
                         sb.AppendLine(joinSql);
                         Builder.SimpleSql(sb.ToString());
+                    }
+                    if (criteria.QueryType == QueryType.Sum)
+                    {
+                        continue;
                     }
                     foreach (var selectSql in joinClause.SelectsSql)
                     {
@@ -202,6 +206,7 @@ namespace TsSoft.Dapper.QueryBuilder
             switch (criteria.QueryType)
             {
                 case QueryType.Simple:
+                case QueryType.Sum:
                     return SimpleTemplate;
                 case QueryType.Paginate:
                     return PaginateTemplate;

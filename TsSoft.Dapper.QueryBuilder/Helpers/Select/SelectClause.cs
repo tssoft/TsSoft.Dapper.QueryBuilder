@@ -2,6 +2,31 @@
 {
     public class SelectClause
     {
+        public SelectClause(string @select)
+        {
+            Select = @select;
+            IsExpression = true;
+        }
+
+        public SelectClause(string @select, bool isExpression)
+        {
+            Select = @select;
+            IsExpression = isExpression;
+        }
+
+        public SelectClause(string @select, string table, bool isExpression)
+        {
+            Select = @select;
+            Table = table;
+            IsExpression = isExpression;
+        }
+
+        public SelectClause()
+        {
+            
+        }
+
+
         public string Select { get; set; }
 
         public string Table { get; set; }

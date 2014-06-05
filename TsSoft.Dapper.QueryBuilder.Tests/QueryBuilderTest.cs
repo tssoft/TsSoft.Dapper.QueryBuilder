@@ -774,6 +774,33 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
                 SimplifyString(query.Sql));
         }
 
+        [TestMethod]
+        public void SumTest()
+        {
+            var testCriteria = new SumCriteria
+            {
+                Ids = new []{1,2,3},
+                QueryType = QueryType.Sum,
+                SelectClause = new SelectClause("sum(Houses.Price)"),
+                WithCustomers = true,
+            };
+            var builder = new TestQueryBuilder<SumCriteria>(testCriteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select sum(Houses.Price) from Houses INNER JOIN Customers on Customers.CustomerId = Houses.CustomerId WHERE Houses.Id in @HousesIds",
+                SimplifyString(query.Sql));
+        }
+
+        [Table("Houses")]
+        private class SumCriteria : Criteria
+        {
+            [Where("Id", WhereType = WhereType.In)]
+            public IEnumerable<int> Ids { get; set; }
+
+            [SimpleJoin("CustomerId", JoinType.Inner, "Customers")]
+            public bool WithCustomers { get; set; }
+        }
+
         private abstract class BaseCriteria : Criteria
         {
             public abstract Guid? Id { get; set; }

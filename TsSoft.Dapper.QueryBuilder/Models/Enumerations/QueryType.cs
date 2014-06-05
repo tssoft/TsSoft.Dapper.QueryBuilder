@@ -5,6 +5,7 @@
         Simple = 0,
         Paginate = 1,
         OnlyCount = 2,
-        Exists = 3
+        Exists = 3,
+        Sum = 4,
     };
 }
