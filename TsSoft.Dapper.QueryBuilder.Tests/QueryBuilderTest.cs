@@ -492,7 +492,7 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             var builder = new TestQueryBuilder<TestWhereMultipleCriteria>(testCriteria);
             var query = builder.Build();
             Assert.AreEqual(
-                "Select Houses.* from Houses WHERE Houses.OwnerId is not null AND Houses.OwnerId = @HousesHasOwnerNotThis",
+                "Select Houses.* from Houses WHERE Houses.OwnerId = @HousesHasOwnerNotThis AND Houses.OwnerId is not null",
                 SimplifyString(query.Sql));
         }
 
