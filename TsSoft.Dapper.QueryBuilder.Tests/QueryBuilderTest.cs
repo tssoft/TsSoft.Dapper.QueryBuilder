@@ -357,6 +357,25 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
                 SimplifyString(query.Sql));
         }
 
+
+        [TestMethod]
+        public void TableNameWithSquareBracketsTest()
+        {
+            var testCriteria = new SquareBracketsTableNameTestCriteria { TestPropertyId = 1 };
+            var builder = new TestQueryBuilder<SquareBracketsTableNameTestCriteria>(testCriteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select [TestTable].* from [TestTable] WHERE [TestTable].TestProperty = @TestTableTestPropertyId",
+                SimplifyString(query.Sql));
+        }
+
+        [Table("[TestTable]")]
+        private class SquareBracketsTableNameTestCriteria : Criteria
+        {
+            [Where("TestProperty", WhereType = WhereType.Eq)]
+            public int? TestPropertyId { get; set; }
+        }
+
         private class FormatterTest : IFormatter
         {
             public void Format(ref object input)
@@ -492,7 +511,7 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
             var builder = new TestQueryBuilder<TestWhereMultipleCriteria>(testCriteria);
             var query = builder.Build();
             Assert.AreEqual(
-                "Select Houses.* from Houses WHERE Houses.OwnerId is not null AND Houses.OwnerId = @HousesHasOwnerNotThis",
+                "Select Houses.* from Houses WHERE Houses.OwnerId = @HousesHasOwnerNotThis AND Houses.OwnerId is not null",
                 SimplifyString(query.Sql));
         }
 
