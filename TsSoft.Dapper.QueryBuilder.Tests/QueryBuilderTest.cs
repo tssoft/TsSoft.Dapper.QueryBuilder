@@ -357,6 +357,25 @@ namespace TsSoft.Dapper.QueryBuilder.Tests
                 SimplifyString(query.Sql));
         }
 
+
+        [TestMethod]
+        public void TableNameWithSquareBracketsTest()
+        {
+            var testCriteria = new SquareBracketsTableNameTestCriteria { TestPropertyId = 1 };
+            var builder = new TestQueryBuilder<SquareBracketsTableNameTestCriteria>(testCriteria);
+            var query = builder.Build();
+            Assert.AreEqual(
+                "Select [TestTable].* from [TestTable] WHERE [TestTable].TestProperty = @TestTableTestPropertyId",
+                SimplifyString(query.Sql));
+        }
+
+        [Table("[TestTable]")]
+        private class SquareBracketsTableNameTestCriteria : Criteria
+        {
+            [Where("TestProperty", WhereType = WhereType.Eq)]
+            public int? TestPropertyId { get; set; }
+        }
+
         private class FormatterTest : IFormatter
         {
             public void Format(ref object input)
